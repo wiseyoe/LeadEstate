@@ -39,14 +39,18 @@ Diagram ini menjelaskan proses utama dalam sistem seperti:
 1. Management Data Lead
 ![DFD Level 1 Management Data Dead](assets/dfdlv1-management-data-lead.jfif)
 
+
 2. Management Database
 ![DFD Level 1 Management Data Dead](assets/dfdlv1-management-database.jfif)
+
 
 3. Sistem Reminder dan Follow-Up
 ![DFD Level 1 Management Data Dead](assets/dfdlv1-sistem-reminder-n-foll-up.jfif)
 
+
 4. Update Status Lead
 ![DFD Level 1 Management Data Dead](assets/dfdlv1-update-status-lead.jfif)
+
 
 5. Laporan & Closing Rate
 ![DFD Level 1 Management Data Dead](assets/belum-ada-bro)
