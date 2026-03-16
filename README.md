@@ -38,11 +38,11 @@ Diagram konteks yang menggambarkan interaksi antara pengguna eksternal seperti A
 
 Diagram ini menjelaskan proses utama dalam sistem seperti:
 
-- Autentikasi pengguna
-- Pengelolaan data lead
-- Follow-up lead
-- Pengiriman reminder
-- Pembuatan laporan penjualan
+1. Management Data Lead
+2. Management Database
+3. Sistem Reminder dan Follow-Up
+4. Update Status Lead
+5. Laporan & Closing Rate
 
 ---
 
@@ -59,12 +59,28 @@ Rancangan antarmuka dibuat menggunakan Figma dengan fokus pada kemudahan penggun
 # Stack Teknologi
 
 Teknologi yang digunakan dalam pengembangan sistem ini:
-
 - **Frontend:** ReactJS (Vite)
 - **Backend:** Java (Spring Boot)
 - **Database:** MySQL
 - **UI Design:** Figma
 - **Version Control:** GitHub
+
+# Arsitektur Sistem
+
+Aplikasi LeadEstate menggunakan arsitektur **client-server**.
+
+Frontend dibangun menggunakan React (Vite) yang berkomunikasi dengan backend melalui REST API.
+
+Backend menggunakan Spring Boot yang menangani:
+- Business logic
+- API endpoint
+- Integrasi database
+
+Database menggunakan MySQL untuk menyimpan data:
+- Lead
+- Sales
+- Follow-up
+- Aktivitas komunikasi
 
 ---
 
@@ -75,12 +91,18 @@ Teknologi yang digunakan dalam pengembangan sistem ini:
 - Mengelola data properti
 - Mengelola template pesan
 - Melihat laporan closing rate
+- Melihat seluruh data lead
+- Mengedit atau menghapus data lead
+- Menentukan lead dialokasikan ke sales tertentu
 
 ### Sales
-- Melihat data lead
+- Melihat data lead yang ditugaskan
+- Menambahkan lead baru (calon pembeli)
+- Mengedit data lead
 - Melakukan follow-up
 - Mengubah status lead
 - Melihat reminder follow-up
+- Melihat riwayat follow-up
 
 ---
 
@@ -106,7 +128,15 @@ Beberapa fitur utama dalam aplikasi:
 
 # Cara Menjalankan Project
 
-1. Clone repository (git clone https://github.com/kep1nZip/LeadEstate.git)
-2. Masuk ke folder project (cd LeadEstate)
-3. Install dependencies frontend (npm install)
-4. Jalankan aplikasi (npm run dev)
+## Menjalankan Backend
+1. cd backend
+2. ./mvnw spring-boot:run
+3. Backend akan berjalan di: http://localhost:8080
+
+---
+
+## Menjalankan Frontend
+1. cd frontend
+2. npm install
+3. npm run dev
+4. Frontend akan berjalan di: http://localhost:5173
