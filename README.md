@@ -37,10 +37,12 @@ Diagram konteks yang menggambarkan interaksi antara pengguna eksternal seperti A
 Diagram ini menjelaskan proses utama dalam sistem seperti:
 
 1. Management Data Lead
+
 ![DFD Level 1 Management Data Dead](assets/dfdlv1-management-data-lead.jfif)
 
 
 2. Management Database
+
 ![DFD Level 1 Management Database](assets/dfdlv1-management-database.jfif)
 
 
