@@ -47,7 +47,7 @@ Rancangan antarmuka dibuat menggunakan Figma dengan fokus pada kemudahan penggun
 
 | Login Page | Dashboard | Halaman Lead |
 | :--------: | :-------: | :----------: |
-| ![Login](assets/login.png) | ![Dashboard](assets/dashboard.png) | ![Lead](assets/lead.png) |
+| ![Login](assets/login-wireframe.jfif) | ![Dashboard](assets/dashboard-wireframe.jfif) | ![Lead](assets/core-feature-wireframe.jfif) |
 
 ---
 
