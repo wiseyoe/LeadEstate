@@ -1,5 +1,5 @@
 package com.leadestate.backend.repository;
 
-public class repository {
+public class PropertyRepository {
     
 }
