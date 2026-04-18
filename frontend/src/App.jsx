@@ -1,14 +1,44 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 
 function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route 
+          path="/" 
+          element={
+            user ? <Navigate to="/dashboard" /> : <Login setUser={setUser} />
+          } 
+        />
+
+        <Route 
+          path="/dashboard" 
+          element={
+            user ? <Dashboard /> : <Navigate to="/" />
+          } 
+        />
+
+        <Route 
+          path="/settings" 
+          element={
+            user ? <Settings /> : <Navigate to="/" />
+          } 
+        />
+
       </Routes>
     </Router>
   );

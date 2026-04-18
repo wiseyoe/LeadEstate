@@ -1,41 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import "./login.css";
-
-// Import logo kamu. Sesuaikan path-nya dengan folder assets kamu
-// Jika nama filenya berbeda, silakan ganti di sini
+import "../styles/login.css";
+import { useNavigate } from "react-router-dom";
 import LogoPng from "../assets/leadestate-logo.png"; 
 
-export default function Login() {
+export default function Login( { setUser } ) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [passVisible, setPassVisible] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    if (e) e.preventDefault(); // Mencegah reload halaman
-    setError("");
 
-    if (!email) return setError("Email tidak boleh kosong.");
-    if (!password) return setError("Password tidak boleh kosong.");
+  // useEffect(() => {
+  //   const user = localStorage.getItem("user");
+  //   if (user) {
+  //     navigate("/dashboard");
+  //   }
+  // }, []);
 
-    try {
-      setLoading(true);
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
-        email,
-        password,
-      });
+  
+const handleLogin = async (e) => {
+  if (e) e.preventDefault();
+  setError("");
 
-      console.log("LOGIN SUCCESS:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
-      alert("Login berhasil!");
-    } catch (err) {
-      setError("Email atau password salah");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!email) return setError("Email tidak boleh kosong.");
+  if (!password) return setError("Password tidak boleh kosong.");
+
+  try {
+    setLoading(true);
+    const res = await axios.post("http://localhost:8080/api/auth/login", {
+      email,
+      password,
+    });
+
+    console.log("LOGIN SUCCESS:", res.data);
+
+    // simpan user
+    localStorage.setItem("user", JSON.stringify(res.data));
+    
+    setUser(res.data);
+    
+    // redirect ke dashboard
+    navigate("/dashboard");
+
+  } catch (err) {
+    setError("Email atau password salah");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-container">
