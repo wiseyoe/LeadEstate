@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository 
 public interface LeadRepository extends JpaRepository<Lead, Integer> {
+
+    long count();
+    long countByStatusId(int statusId);
 }

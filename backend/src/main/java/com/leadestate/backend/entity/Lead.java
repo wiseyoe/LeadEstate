@@ -1,13 +1,14 @@
 package com.leadestate.backend.entity;
 
-import jakarta.persistence.*; 
-import lombok.Data;          
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
-@Entity 
-@Table(name = "leads") 
+@Entity
+@Table(name = "leads")
 @Data
 public class Lead {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -15,7 +16,6 @@ public class Lead {
     private String name;
     private String phone;
     private String email;
-
 
     @Column(name = "property_id")
     private int propertyId;
@@ -29,7 +29,11 @@ public class Lead {
     private String source;
 
     @Column(name = "created_at", insertable = false, updatable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
+
+    // =============================
+    // METHOD SESUAI SEQUENCE DIAGRAM
+    // =============================
 
     public void changeStatus(int newStatusId) {
         this.statusId = newStatusId;

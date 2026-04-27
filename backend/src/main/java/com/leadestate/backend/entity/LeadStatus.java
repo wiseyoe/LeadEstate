@@ -1,8 +1,17 @@
 package com.leadestate.backend.entity;
 
-public class LeadStatus {
-    private int id;
-    private String statusName; // New Lead, Contacted, Follow Up, dll
+import jakarta.persistence.*;
+import lombok.Data;
 
-    public String getStatusDetail() { return this.statusName; }
+@Entity
+@Table(name = "lead_status")
+@Data
+public class LeadStatus {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "status_name")
+    private String statusName;
 }
