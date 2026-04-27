@@ -47,4 +47,38 @@ public class AuthController {
         }
         return ResponseEntity.ok("Email tersedia");
     }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> req) {
+        String email = req.get("email");
+
+        try {
+            String token = authService.createResetToken(email);
+            return ResponseEntity.ok("Token reset: " + token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/validate-token")
+    public ResponseEntity<?> validateToken(@RequestParam String token) {
+        try {
+            String email = authService.validateToken(token);
+            return ResponseEntity.ok("Token valid untuk email: " + email);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> req) {
+        String token = req.get("token");
+        String newPassword = req.get("newPassword");
+
+        try {
+            authService.resetPassword(token, newPassword);
+            return ResponseEntity.ok("Password berhasil diupdate");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
