@@ -6,9 +6,11 @@ import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.service.LeadService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/leads")
@@ -51,9 +53,12 @@ public class LeadController {
     // FR7 - Update Status
     // =========================
     @PutMapping("/{id}/status")
-    public Lead updateStatus(
+    public ResponseEntity<?> updateStatus(
             @PathVariable int id,
-            @RequestParam int statusId) {
-        return leadService.updateStatus(id, statusId);
+            @RequestBody Map<String, Integer> body
+    ) {
+        return ResponseEntity.ok(
+            leadService.updateStatus(id, body.get("statusId"))
+        );
     }
 }

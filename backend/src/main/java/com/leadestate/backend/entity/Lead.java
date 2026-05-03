@@ -23,8 +23,9 @@ public class Lead {
     @Column(name = "sales_id")
     private int salesId;
 
-    @Column(name = "status_id")
-    private int statusId;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private LeadStatus status;
 
     private String source;
 
@@ -35,8 +36,8 @@ public class Lead {
     // METHOD SESUAI SEQUENCE DIAGRAM
     // =============================
 
-    public void changeStatus(int newStatusId) {
-        this.statusId = newStatusId;
+    public void changeStatus(LeadStatus newStatus) {
+        this.status = newStatus;
     }
 
     public void assignToSales(int newSalesId) {
