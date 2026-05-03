@@ -29,4 +29,22 @@ public class ReportController {
     public Object getFollowUpStatusReport() {
         return reportService.getFollowUpStatusReport();
     }
+
+    @GetMapping("/lead-status")
+    public Object getLeadStatusReport() {
+        return reportService.getLeadStatusReport();
+    }
+
+
+    // Lead per Month
+    @GetMapping("/lead-per-month")
+    public Object getLeadPerMonthReport() {
+        return reportService.getLeadPerMonthReport();
+    }
+
+    // Performance per Sales
+    @GetMapping("/sales-performance")
+    public Object getSalesPerformanceReport() {
+        return reportService.getSalesPerformanceReport();
+    }
 }

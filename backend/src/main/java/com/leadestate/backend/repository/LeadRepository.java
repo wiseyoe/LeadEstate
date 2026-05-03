@@ -20,4 +20,17 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
        "FROM Lead l " +
        "GROUP BY l.status.id, l.status.statusName")
     List<Object[]> countLeadsByStatus();
+
+    // Lead per Month
+    @Query("SELECT FUNCTION('MONTH', l.createdAt), COUNT(l) " +
+        "FROM Lead l " +
+        "GROUP BY FUNCTION('MONTH', l.createdAt) " +
+        "ORDER BY FUNCTION('MONTH', l.createdAt)")
+    List<Object[]> countLeadsPerMonth();
+
+    // Performance per Sales
+    @Query("SELECT l.salesId, COUNT(l) " +
+        "FROM Lead l " +
+        "GROUP BY l.salesId")
+    List<Object[]> countLeadsBySales();
 }
