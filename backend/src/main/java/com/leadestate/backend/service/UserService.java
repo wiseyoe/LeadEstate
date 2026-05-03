@@ -29,10 +29,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // UPDATE USER
+    // 🔥 UPDATE USER (FIXED + VALIDASI EMAIL)
     public User updateUser(Integer id, User user) {
         User existingUser = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        // VALIDASI EMAIL (biar ga duplicate)
+        if (!existingUser.getEmail().equals(user.getEmail()) &&
+            userRepository.existsByEmail(user.getEmail())) {
+
+            throw new RuntimeException("Email sudah digunakan");
+        }
 
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
@@ -42,11 +49,31 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
-    // DELETE USER
-    public void deleteUser(Integer id) {
-        User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+    
+    public String deleteUser(Integer id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
-        userRepository.delete(user);
+    String name = user.getName();
+
+    userRepository.delete(user);
+
+    return "User " + name + " dengan id " + id + " berhasil dihapus";
+}
+public User updateProfile(Integer id, User request) {
+
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+    // update hanya field profile
+    user.setName(request.getName());
+    user.setEmail(request.getEmail());
+
+    // optional password
+    if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+        user.setPassword(request.getPassword());
     }
+
+    return userRepository.save(user);
+}
 }
