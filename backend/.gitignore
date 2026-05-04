@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Konfigurasi utama
+src/main/resources/application.properties
+
+# .env
+.env
