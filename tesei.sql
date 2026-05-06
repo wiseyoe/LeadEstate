@@ -26,7 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Table structure for table `follow_ups`
 --
-
+DROP TABLE IF EXISTS follow_ups;
 CREATE TABLE `follow_ups` (
   `id` int(11) NOT NULL,
   `lead_id` int(11) NOT NULL,
@@ -58,7 +58,7 @@ INSERT INTO `follow_ups` (`id`, `lead_id`, `sales_id`, `notes`, `followup_date`,
 --
 -- Table structure for table `leads`
 --
-
+DROP TABLE IF EXISTS leads;
 CREATE TABLE `leads` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -93,6 +93,7 @@ INSERT INTO `leads` (`id`, `name`, `phone`, `email`, `property_id`, `sales_id`, 
 -- Table structure for table `lead_status`
 --
 
+DROP TABLE IF EXISTS lead_status;
 CREATE TABLE `lead_status` (
   `id` int(11) NOT NULL,
   `status_name` varchar(50) NOT NULL
@@ -116,6 +117,7 @@ INSERT INTO `lead_status` (`id`, `status_name`) VALUES
 -- Table structure for table `permissions`
 --
 
+DROP TABLE IF EXISTS permissions;
 CREATE TABLE `permissions` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -139,6 +141,7 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 -- Table structure for table `properties`
 --
 
+DROP TABLE IF EXISTS properties;
 CREATE TABLE `properties` (
   `id` int(11) NOT NULL,
   `name` varchar(150) NOT NULL,
@@ -169,6 +172,7 @@ INSERT INTO `properties` (`id`, `name`, `location`, `price`, `created_at`) VALUE
 -- Table structure for table `reminders`
 --
 
+DROP TABLE IF EXISTS reminders;
 CREATE TABLE `reminders` (
   `id` int(11) NOT NULL,
   `followup_id` int(11) NOT NULL,
@@ -193,6 +197,7 @@ INSERT INTO `reminders` (`id`, `followup_id`, `reminder_date`, `status`) VALUES
 -- Table structure for table `roles`
 --
 
+DROP TABLE IF EXISTS roles;
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
   `role_name` varchar(50) NOT NULL,
@@ -214,6 +219,7 @@ INSERT INTO `roles` (`id`, `role_name`, `description`) VALUES
 -- Table structure for table `role_permission`
 --
 
+DROP TABLE IF EXISTS role_permission;
 CREATE TABLE `role_permission` (
   `role_id` int(11) NOT NULL,
   `perm_id` int(11) NOT NULL
@@ -241,6 +247,7 @@ INSERT INTO `role_permission` (`role_id`, `perm_id`) VALUES
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS users;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,

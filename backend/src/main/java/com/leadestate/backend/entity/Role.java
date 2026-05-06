@@ -1,9 +1,19 @@
 package com.leadestate.backend.entity;
 
-public class Role {
-    private int id;
-    private String roleName; // Admin, Supervisor, Sales
-    private String description;
+import jakarta.persistence.*;
+import lombok.Data;
 
-    public void addPermission(int permId) { }
+@Entity
+@Table(name = "roles")
+@Data
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "role_name")
+    private String roleName;
+
+    private String description;
 }
