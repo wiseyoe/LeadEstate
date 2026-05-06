@@ -12,17 +12,17 @@ export default function Login( { setUser } ) {
   const [passVisible, setPassVisible] = useState(false);
   const navigate = useNavigate();
 
+const API = import.meta.env.VITE_API_URL || "";
 
-  // useEffect(() => {
-  //   const user = localStorage.getItem("user");
-  //   if (user) {
-  //     navigate("/dashboard");
-  //   }
-  // }, []);
+//test API
+console.log("API URL:", API);
 
-  
 const handleLogin = async (e) => {
   if (e) e.preventDefault();
+
+//test API
+console.log("API URL:", API);
+
   setError("");
 
   if (!email) return setError("Email tidak boleh kosong.");
@@ -30,22 +30,21 @@ const handleLogin = async (e) => {
 
   try {
     setLoading(true);
-    const res = await axios.post("http://localhost:8080/api/auth/login", {
+
+    const res = await axios.post(`${API}/api/auth/login`, {
       email,
       password,
     });
 
     console.log("LOGIN SUCCESS:", res.data);
 
-    // simpan user
     localStorage.setItem("user", JSON.stringify(res.data));
-    
     setUser(res.data);
-    
-    // redirect ke dashboard
+
     navigate("/dashboard");
 
   } catch (err) {
+    console.error(err);
     setError("Email atau password salah");
   } finally {
     setLoading(false);
