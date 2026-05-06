@@ -27,7 +27,7 @@ public class ReportService {
 
         for (Object[] row : results) {
             String status = (String) row[0];
-            long count = (long) row[1];
+            long count = ((Number) row[1]).longValue();
             response.add(new ChartResponse(status, count));
         }
 
@@ -43,7 +43,7 @@ public class ReportService {
 
         for (Object[] row : results) {
             String statusName = (String) row[1];
-            long count = (long) row[2];
+            long count = ((Number) row[2]).longValue();
 
             response.add(new ChartResponse(statusName, count));
         }
@@ -61,7 +61,7 @@ public class ReportService {
 
         for (Object[] row : results) {
             int monthIndex = ((Number) row[0]).intValue();
-            long count = (long) row[1];
+            long count = ((Number) row[1]).longValue();
 
             response.add(new ChartResponse(months[monthIndex - 1], count));
         }
@@ -76,8 +76,8 @@ public class ReportService {
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            int salesId = (int) row[0];
-            long count = (long) row[1];
+            int salesId = ((Number) row[0]).intValue();
+            long count = ((Number) row[1]).longValue();
 
             response.add(new ChartResponse("Sales " + salesId, count));
         }

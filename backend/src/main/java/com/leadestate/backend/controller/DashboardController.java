@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.leadestate.backend.dto.ChartResponse;
 import com.leadestate.backend.service.DashboardService;
 
 // Import tambahan agar List dan Map terbaca
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -29,7 +29,12 @@ public class DashboardController {
      * URL: GET http://localhost:8080/api/dashboard/leads-by-status
      */
     @GetMapping("/leads-by-status")
-    public List<Map<String, Object>> getLeadsByStatus() {
+    public List<ChartResponse> getLeadsByStatus() {
         return dashboardService.getLeadsByStatus();
+    }
+
+    @GetMapping("/sales-performance")
+    public List<ChartResponse> getSalesPerformance() {
+        return dashboardService.getSalesPerformance();
     }
 }

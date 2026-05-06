@@ -12,17 +12,26 @@ public class DashboardResponse {
     private long pendingReminders;
     private long doneReminders;
 
+    private long closedLeads;
+    private long activeLeads;
+
     public DashboardResponse(long totalLeads, long totalFollowUps,
-                             long pendingFollowUps, long doneFollowUps, long cancelledFollowUps,
-                             long pendingReminders, long doneReminders) {
+                            long pendingFollowUps, long doneFollowUps, long cancelledFollowUps,
+                            long pendingReminders, long doneReminders,
+                            long closedLeads, long activeLeads) {
 
         this.totalLeads = totalLeads;
         this.totalFollowUps = totalFollowUps;
+
         this.pendingFollowUps = pendingFollowUps;
         this.doneFollowUps = doneFollowUps;
         this.cancelledFollowUps = cancelledFollowUps;
+
         this.pendingReminders = pendingReminders;
         this.doneReminders = doneReminders;
+
+        this.closedLeads = closedLeads;
+        this.activeLeads = activeLeads;
     }
 
     public long getTotalLeads() { return totalLeads; }
@@ -34,4 +43,7 @@ public class DashboardResponse {
 
     public long getPendingReminders() { return pendingReminders; }
     public long getDoneReminders() { return doneReminders; }
+
+    public long getClosedLeads() { return closedLeads; }
+    public long getActiveLeads() { return activeLeads; }
 }
