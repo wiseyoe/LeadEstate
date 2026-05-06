@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.leadestate.backend.service.AuthService;
 import com.leadestate.backend.entity.User;
+import com.leadestate.backend.dto.UserResponse;
 
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class AuthController {
         String password = req.get("password");
 
         try {
-            User user = authService.login(email, password);
+            UserResponse user = authService.login(email, password);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

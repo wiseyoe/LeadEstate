@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.leadestate.backend.entity.User;
+import com.leadestate.backend.dto.UserResponse;
 import com.leadestate.backend.repository.UserRepository;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class AuthService {
     private Map<String, String> resetTokens = new HashMap<>();
     private Map<String, Long> tokenExpiry = new HashMap<>();
 
-    public User login(String email, String password) {
+    public UserResponse login(String email, String password) {
 
         System.out.println("=== LOGIN ATTEMPT ===");
         System.out.println("Email input: " + email);
@@ -41,7 +42,22 @@ public class AuthService {
 
         System.out.println("🎉 LOGIN BERHASIL");
 
-        return user;
+        // 🔥 TAMBAHAN LOGIC ROLE
+        System.out.println("ROLE ID: " + user.getRoleId());
+
+        // convert roleId → roleName
+        String roleName = switch (user.getRoleId() != null ? user.getRoleId() : 0) {
+            case 1 -> "Admin";
+            case 3 -> "Sales";
+            default -> "Unknown";
+        };
+
+        return new UserResponse(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            roleName
+        );
     }
 
     public User register(User user) {
@@ -106,5 +122,21 @@ public class AuthService {
 
         resetTokens.remove(token);
         tokenExpiry.remove(token);
+    }
+
+    // ==========================
+    // 🔥 HELPER AUTHORIZATION
+    // ==========================
+
+    public void checkAdmin(String role) {
+        if (!"Admin".equals(role)) {
+            throw new RuntimeException("Access denied: Admin only");
+        }
+    }
+
+    public void checkSalesOrAdmin(String role) {
+        if (!"Admin".equals(role) && !"Sales".equals(role)) {
+            throw new RuntimeException("Access denied");
+        }
     }
 }

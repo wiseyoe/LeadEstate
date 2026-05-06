@@ -9,6 +9,9 @@ import java.util.List;
 @Repository 
 public interface LeadRepository extends JpaRepository<Lead, Integer> {
 
+    // Filter lead berdasarkan ID sales
+    List<Lead> findBySalesId(int salesId);
+
     // Menghitung total semua lead
     long count();
 

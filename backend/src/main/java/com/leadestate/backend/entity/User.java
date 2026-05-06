@@ -57,4 +57,11 @@ public class User {
     public void setRoleId(Integer roleId){
         this.roleId=roleId;
     }
+    public boolean isAdmin() {
+        return this.roleId != null && this.roleId == 1;
+    }
+
+    public boolean isSales() {
+        return this.roleId != null && this.roleId == 3;
+    }
 }

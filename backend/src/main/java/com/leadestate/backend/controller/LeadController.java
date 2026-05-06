@@ -2,7 +2,9 @@ package com.leadestate.backend.controller;
 
 import com.leadestate.backend.dto.LeadRequest;
 import com.leadestate.backend.entity.Lead;
+import com.leadestate.backend.entity.User;
 import com.leadestate.backend.repository.LeadRepository;
+import com.leadestate.backend.repository.UserRepository;
 import com.leadestate.backend.service.LeadService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +19,14 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173")
 public class LeadController {
 
-    // ===== dari no.1 =====
     @Autowired
     private LeadRepository leadRepository;
 
-    // ===== dari no.2 =====
     @Autowired
     private LeadService leadService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // =========================
     // FR5 - Tambah Lead
@@ -37,12 +40,15 @@ public class LeadController {
     // FR6 - Get All Leads (SERVICE)
     // =========================
     @GetMapping
-    public List<Lead> getAllLeads() {
-        return leadService.getAllLeads();
+    public List<Lead> getLeads(@RequestParam int userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        return leadService.getLeadsByUser(user);
     }
 
     // =========================
-    // FR6 versi RAW (dari no.1)
+    // FR6 versi RAW
     // =========================
     @GetMapping("/raw")
     public List<Lead> getAllLeadsRaw() {

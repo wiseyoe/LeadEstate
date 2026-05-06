@@ -4,6 +4,7 @@ import com.leadestate.backend.dto.LeadRequest;
 import com.leadestate.backend.dto.ReportResponse;
 import com.leadestate.backend.entity.Lead;
 import com.leadestate.backend.entity.LeadStatus;
+import com.leadestate.backend.entity.User;
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.LeadStatusRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
@@ -25,6 +26,14 @@ public class LeadService {
 
     @Autowired
     private LeadStatusRepository leadStatusRepository;
+
+    public List<Lead> getLeadsByUser(User user) {
+        if (user.isAdmin()) {
+            return leadRepository.findAll();
+        } else {
+            return leadRepository.findBySalesId(user.getId());
+        }
+    }
 
     // =========================
     // FR5 - Tambah Lead
