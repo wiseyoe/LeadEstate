@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import com.leadestate.backend.repository.FollowUpRepository;
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.dto.ChartResponse;
+import com.leadestate.backend.entity.Lead;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -36,7 +38,7 @@ public class ReportService {
 
     /**
      * Mengambil laporan jumlah lead berdasarkan status
-     */
+     */ 
     public List<ChartResponse> getLeadStatusReport() {
         List<Object[]> results = leadRepository.countLeadsByStatus();
         List<ChartResponse> response = new ArrayList<>();
@@ -83,5 +85,15 @@ public class ReportService {
         }
 
         return response;
+    }
+
+    // FILTER LEAD
+    public List<Lead> filterLeads(
+        Integer salesId,
+        Integer propertyId,
+        LocalDateTime start,
+        LocalDateTime end
+    ) {
+        return leadRepository.filterLeads(salesId, propertyId, start, end);
     }
 }

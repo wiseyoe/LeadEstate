@@ -36,4 +36,17 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
         "FROM Lead l " +
         "GROUP BY l.salesId")
     List<Object[]> countLeadsBySales();
+
+    //Filter Leads
+    @Query("SELECT l FROM Lead l WHERE " +
+        "(:salesId IS NULL OR l.salesId = :salesId) AND " +
+        "(:propertyId IS NULL OR l.propertyId = :propertyId) AND " +
+        "(:start IS NULL OR l.createdAt >= :start) AND " +
+        "(:end IS NULL OR l.createdAt <= :end)")
+    List<Lead> filterLeads(
+        Integer salesId,
+        Integer propertyId,
+        java.time.LocalDateTime start,
+        java.time.LocalDateTime end
+    );
 }
