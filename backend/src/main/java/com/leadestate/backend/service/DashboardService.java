@@ -13,6 +13,7 @@ import com.leadestate.backend.repository.ReminderRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class DashboardService {
@@ -58,46 +59,84 @@ public class DashboardService {
             null  // reminders
         );
 
-        // 3. HARDCODE DATA (Sesuai Instruksi agar Frontend hidup)
-        
-        // Chart Data (Bulan, Leads, Closing)
-        response.setChartData(List.of(
-            new ChartResponse("Jan", 12, 3),
-            new ChartResponse("Feb", 18, 5),
-            new ChartResponse("Mar", 25, 8),
-            new ChartResponse("Apr", 20, 6),
-            new ChartResponse("Mei", 30, 10),
-            new ChartResponse("Jun", 40, 15)
-        ));
+        // 3. IMPLEMENTASI DATA REAL DARI REPOSITORY (GANTI HARDCODE)
+        // ================= CHART DATA =================
+        List<Object[]> chartResults = leadRepository.getChartData();
+        List<ChartResponse> chartData = new ArrayList<>();
 
-        // Top Sales Data
-        response.setTopSales(List.of(
-            new TopSalesResponse("Budi Wicaksono", "BW", 20, 5, "#f59e0b"),
-            new TopSalesResponse("Sari Rahayu", "SR", 18, 4, "#6366f1"),
-            new TopSalesResponse("Kevin Ukinami", "KU", 15, 3, "#10b981")
-        ));
+        String[] months = {
+            "", "Jan", "Feb", "Mar", "Apr", "Mei",
+            "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+        };
 
-        // Reminders Data
-        response.setReminders(List.of(
-            new ReminderResponse(
-                "Rafi Kennedy",
-                "RK",
-                "🏠 Rumah Bekasi",
+        for (Object[] row : chartResults) {
+            int month = ((Number) row[0]).intValue();
+            long leads = ((Number) row[1]).longValue();
+            long closing = ((Number) row[2]).longValue();
+
+            chartData.add(new ChartResponse(
+                months[month],
+                (int) leads,
+                (int) closing
+            ));
+        }
+        response.setChartData(chartData);
+
+        // ================= TOP SALES =================
+        List<Object[]> salesResults = leadRepository.getTopSales();
+        List<TopSalesResponse> topSales = new ArrayList<>();
+
+        String[] colors = {
+            "#f59e0b",
+            "#6366f1",
+            "#10b981",
+            "#ef4444",
+            "#8b5cf6"
+        };
+
+        int i = 0;
+        for (Object[] row : salesResults) {
+            String name = (String) row[0];
+            long closing = ((Number) row[1]).longValue();
+            String initials = name.substring(0, 1).toUpperCase();
+
+            topSales.add(new TopSalesResponse(
+                name,
+                initials,
+                (int) closing * 2, // Dummy logic untuk follow-up ratio
+                (int) closing,
+                colors[i % colors.length]
+            ));
+            i++;
+        }
+        response.setTopSales(topSales);
+
+        // ================= REMINDERS =================
+        List<Object[]> reminderResults = reminderRepository.getTodayReminders();
+        List<ReminderResponse> reminders = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        for (Object[] row : reminderResults) {
+            String leadName = (String) row[0];
+            String propertyName = (String) row[1];
+            
+            java.time.LocalDateTime followupDate = 
+                ((java.sql.Timestamp) row[2]).toLocalDateTime();
+
+            String status = (String) row[3];
+
+            reminders.add(new ReminderResponse(
+                leadName,
+                leadName.substring(0, 1).toUpperCase(),
+                "🏠 " + propertyName,
                 "H+1",
-                "10:30",
-                "today",
+                followupDate.format(formatter),
+                status.equals("done") ? "today" : "soon",
                 "#f59e0b"
-            ),
-            new ReminderResponse(
-                "Kevin Ukinami",
-                "KU",
-                "🏢 Apartemen Bandung",
-                "H+3",
-                "13:00",
-                "soon",
-                "#10b981"
-            )
-        ));
+            ));
+        }
+        response.setReminders(reminders);
 
         return response;
     }
