@@ -16,6 +16,9 @@ public class DashboardResponse {
 
     private long closedLeads;
     private long activeLeads;
+    private long todayFollowups;
+    private long pendingLeads;
+    private long monthlyClosing;
 
     // Field Tambahan untuk Chart, Top Sales, dan Reminders
     private List<ChartResponse> chartData;
@@ -61,6 +64,9 @@ public class DashboardResponse {
     public List<ChartResponse> getChartData() { return chartData; }
     public List<TopSalesResponse> getTopSales() { return topSales; }
     public List<ReminderResponse> getReminders() { return reminders; }
+    public long getTodayFollowups() { return todayFollowups;}
+    public long getPendingLeads() { return pendingLeads;}
+    public long getMonthlyClosing() { return monthlyClosing;}
 
     // --- SETTER ---
     public void setTotalLeads(long totalLeads) { this.totalLeads = totalLeads; }
@@ -75,4 +81,7 @@ public class DashboardResponse {
     public void setChartData(List<ChartResponse> chartData) { this.chartData = chartData; }
     public void setTopSales(List<TopSalesResponse> topSales) { this.topSales = topSales; }
     public void setReminders(List<ReminderResponse> reminders) { this.reminders = reminders; }
+    public void setTodayFollowups(long todayFollowups) { this.todayFollowups = todayFollowups; }
+    public void setPendingLeads(long pendingLeads) { this.pendingLeads = pendingLeads; }
+    public void setMonthlyClosing(long monthlyClosing) { this.monthlyClosing = monthlyClosing; }
 }

@@ -41,7 +41,7 @@ public class DashboardService {
 
         long closedLeads = leadRepository.countByStatus_Id(5); // status 5 = Closed
         long activeLeads = totalLeads - closedLeads;
-
+        
         // 2. Inisialisasi DashboardResponse menggunakan Constructor
         // Karena kita sudah mengupdate DashboardResponse, kita kirimkan null dulu untuk List-nya
         DashboardResponse response = new DashboardResponse(
@@ -137,6 +137,16 @@ public class DashboardService {
             ));
         }
         response.setReminders(reminders);
+
+        // FOLLOW UP HARI INI
+        response.setTodayFollowups(pendingFollowUps);
+
+        // LEAD TERTUNDA
+        response.setPendingLeads(pendingFollowUps);
+
+        // CLOSING BULAN INI
+        response.setMonthlyClosing(closedLeads);
+
 
         return response;
     }
