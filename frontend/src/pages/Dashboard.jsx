@@ -1,32 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "../styles/Dashboard.css";
 import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
-
-// ── DATA ──────────────────────────────────────────────────────────────────────
-const chartData = [
-  { m: "Okt", leads: 28, closing: 6 },
-  { m: "Nov", leads: 34, closing: 8 },
-  { m: "Des", leads: 30, closing: 9 },
-  { m: "Jan", leads: 38, closing: 7 },
-  { m: "Feb", leads: 42, closing: 10 },
-  { m: "Mar", leads: 45, closing: 11 },
-];
-
-const topSales = [
-  { rank: 1, initials: "BW", name: "Budi Wicaksono", followUp: 28, closing: 5, color: "#f59e0b" },
-  { rank: 2, initials: "SR", name: "Sari Rahayu",    followUp: 22, closing: 3, color: "#6366f1" },
-  { rank: 3, initials: "DH", name: "Dian Hartono",   followUp: 18, closing: 2, color: "#10b981" },
-  { rank: 4, initials: "FK", name: "Fajar Kusuma",   followUp: 14, closing: 1, color: "#8b5cf6" },
-  { rank: 5, initials: "NA", name: "Nina Amelia",    followUp: 10, closing: 0, color: "#ef4444" },
-];
-
-const reminders = [
-  { initials: "RK", name: "Rafi Kennedy",  prop: "🏠 Rumah Di Cibaduyut · Sales: Budi W.", h: "H+1", time: "10.30", tag: "today", color: "#f59e0b" },
-  { initials: "FY", name: "Firasy Yaeger", prop: "🏠 Rumah Di Banjar · Sales: Sari R.",     h: "H+3", time: "12.45", tag: "today", color: "#6366f1" },
-  { initials: "KU", name: "Kevin Ukinami", prop: "🏠 Rumah Di Karawang · Sales: Dian H.",   h: "H+7", time: "13.09", tag: "soon",  color: "#10b981" },
-  { initials: "AM", name: "Andi Maulana",  prop: "🏠 Apartemen Bekasi · Sales: Fajar K.",   h: "-2",  time: "08.00", tag: "late",  color: "#ef4444", hStyle: { background: "#fee2e2", color: "#dc2626" } },
-];
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
 
@@ -45,7 +21,9 @@ function StatCard({ color, icon, trend, trendDir, value, label, sub }) {
 }
 
 function BarChart({ data, activeTab, onTabChange }) {
-  const max = Math.max(...data.map((d) => d.leads));
+  // Cegah error jika data kosong
+  const max = data.length > 0 ? Math.max(...data.map((d) => d.leads || 0)) : 10;
+  
   return (
     <div className="le-card">
       <div className="le-card-header">
@@ -60,11 +38,11 @@ function BarChart({ data, activeTab, onTabChange }) {
       </div>
       <div className="le-chart-area">
         <div className="le-bar-chart">
-          {data.map((d) => {
-            const h1 = Math.round((d.leads / max) * 110);
-            const h2 = Math.round((d.closing / max) * 110);
+          {data.map((d, index) => {
+            const h1 = Math.round(((d.leads || 0) / max) * 110);
+            const h2 = Math.round(((d.closing || 0) / max) * 110);
             return (
-              <div className="le-bar-group" key={d.m}>
+              <div className="le-bar-group" key={index}>
                 <div className="le-bars">
                   <div className="le-bar b1" style={{ height: h1 }} title={`${d.leads} leads`} />
                   <div className="le-bar b2" style={{ height: h2 }} title={`${d.closing} closing`} />
@@ -106,17 +84,17 @@ function Leaderboard({ data }) {
         <div className="le-chip">Maret 2026</div>
       </div>
       <div className="le-leader-list">
-        {data.map((s) => (
-          <div className="le-leader-item" key={s.rank}>
-            <div className={`le-leader-rank ${rankClass(s.rank)}`}>{s.rank}</div>
-            <div className="le-leader-av" style={{ background: s.color }}>{s.initials}</div>
+        {data.length > 0 ? data.map((s, index) => (
+          <div className="le-leader-item" key={index}>
+            <div className={`le-leader-rank ${rankClass(index + 1)}`}>{index + 1}</div>
+            <div className="le-leader-av" style={{ background: s.color || "#6366f1" }}>{s.initials}</div>
             <div className="le-leader-info">
               <div className="le-leader-name">{s.name}</div>
               <span className="le-leader-badge">{s.followUp} follow-up</span>
             </div>
             <div className="le-leader-closing">{s.closing} ✅</div>
           </div>
-        ))}
+        )) : <div className="le-view-all">Belum ada data sales</div>}
       </div>
     </div>
   );
@@ -142,9 +120,9 @@ function ReminderSection({ data, activeFilter, onFilterChange }) {
         </div>
       </div>
       <div className="le-reminder-list">
-        {data.map((r) => (
-          <div className="le-reminder-item" key={r.name}>
-            <div className="le-ri-avatar" style={{ background: r.color }}>{r.initials}</div>
+        {data.length > 0 ? data.map((r, index) => (
+          <div className="le-reminder-item" key={index}>
+            <div className="le-ri-avatar" style={{ background: r.color || "#f59e0b" }}>{r.initials}</div>
             <div className="le-ri-info">
               <div className="le-ri-name">{r.name}</div>
               <div className="le-ri-prop">{r.prop}</div>
@@ -155,7 +133,7 @@ function ReminderSection({ data, activeFilter, onFilterChange }) {
               <div className={`le-ri-tag tag-${r.tag}`}>{tagLabel[r.tag]}</div>
             </div>
           </div>
-        ))}
+        )) : <div className="le-view-all">Tidak ada reminder hari ini</div>}
       </div>
       <div className="le-view-all">Lihat semua reminder →</div>
     </div>
@@ -167,25 +145,51 @@ export default function LeadEstateDashboard() {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [chartTab, setChartTab] = useState("6");
   const [reminderFilter, setReminderFilter] = useState("Semua");
+  
+  // 1. Integrasi API
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_URL;
 
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await axios.get(`${API}/api/dashboard`);
+      console.log("DASHBOARD DATA:", res.data);
+      setDashboardData(res.data);
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Loading Screen
+  if (loading) {
+    return (
+      <div className="le-root" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className="le-card-title">Memuat data Dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="le-root">
 
       {/* ── SIDEBAR ── */}
       <aside className="le-sidebar">
-
         {/* Brand */}
         <div className="le-brand">
           <img src={logo} alt="LeadEstate Logo" className="brand-logo" />
           <div className="le-brand-name">Lead<span>Estate</span></div>
         </div>
 
-
-        {/* Nav */}
+        {/* Nav - Menu Utama tetap dipertahankan */}
         <nav className="le-nav">
-
           <div className="le-nav-label">Menu Utama</div>
 
           <div
@@ -214,7 +218,7 @@ export default function LeadEstateDashboard() {
               </svg>
             </span>
             Reminder &amp; Follow-Up
-            <span className="le-nav-badge">5</span>
+            <span className="le-nav-badge">{dashboardData?.todayFollowups || 0}</span>
           </div>
 
           <div
@@ -278,7 +282,6 @@ export default function LeadEstateDashboard() {
             </span>
             Pengaturan
           </div>
-
         </nav>
 
         {/* Footer */}
@@ -289,13 +292,12 @@ export default function LeadEstateDashboard() {
             <div className="le-user-role">Administrator</div>
           </div>
         </div>
-
       </aside>
 
       {/* MAIN */}
       <main className="le-main">
         <div className="le-topbar">
-          <div className="le-topbar-title">Dashboard</div>
+          <div className="le-topbar-title">Dashboard Overview</div>
           <div className="le-topbar-right">
             <div className="le-date-chip">📅 Jum'at, 20 Maret 2026</div>
             <div className="le-notif-btn">
@@ -309,18 +311,58 @@ export default function LeadEstateDashboard() {
 
         <div className="le-content">
           <div className="le-stats-grid">
-            <StatCard color="gold"  icon="📋" trend="↑ 12%" trendDir="up"   value="142" label="Total Lead Aktif"    sub="+17 lead baru minggu ini" />
-            <StatCard color="blue"  icon="🔔" trend="↑ 3"   trendDir="up"   value="12"  label="Follow Up Hari Ini"  sub="5 belum dikerjakan" />
-            <StatCard color="red"   icon="⏳" trend="↑ 4"   trendDir="down" value="8"   label="Lead Tertunda"       sub="Perlu tindakan segera" />
-            <StatCard color="green" icon="✅" trend="↑ 22%" trendDir="up"   value="11"  label="Closing Bulan Ini"   sub="Target: 15 | Sisa 4 lagi" />
+            <StatCard 
+              color="gold" 
+              icon="📋" 
+              trend="↑ 12%" 
+              trendDir="up" 
+              value={dashboardData?.totalLeads || 0} 
+              label="Total Lead Aktif" 
+              sub="+17 lead baru minggu ini" 
+            />
+            <StatCard 
+              color="blue" 
+              icon="🔔" 
+              trend="↑ 3" 
+              trendDir="up" 
+              value={dashboardData?.todayFollowups || 0} 
+              label="Follow Up Hari Ini" 
+              sub="Lihat semua reminder" 
+            />
+            <StatCard 
+              color="red" 
+              icon="⏳" 
+              trend="↑ 4" 
+              trendDir="down" 
+              value={dashboardData?.pendingLeads || 0} 
+              label="Lead Tertunda" 
+              sub="Perlu tindakan segera" 
+            />
+            <StatCard 
+              color="green" 
+              icon="✅" 
+              trend="↑ 22%" 
+              trendDir="up" 
+              value={dashboardData?.monthlyClosing || 0} 
+              label="Closing Bulan Ini" 
+              sub="Target: 15" 
+            />
           </div>
 
           <div className="le-mid-row">
-            <BarChart data={chartData} activeTab={chartTab} onTabChange={setChartTab} />
-            <Leaderboard data={topSales} />
+            <BarChart 
+              data={dashboardData?.chartData || []} 
+              activeTab={chartTab} 
+              onTabChange={setChartTab} 
+            />
+            <Leaderboard data={dashboardData?.topSales || []} />
           </div>
 
-          <ReminderSection data={reminders} activeFilter={reminderFilter} onFilterChange={setReminderFilter} />
+          <ReminderSection 
+            data={dashboardData?.reminders || []} 
+            activeFilter={reminderFilter} 
+            onFilterChange={setReminderFilter} 
+          />
         </div>
       </main>
 

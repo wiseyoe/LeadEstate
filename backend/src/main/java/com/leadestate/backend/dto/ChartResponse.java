@@ -2,14 +2,29 @@ package com.leadestate.backend.dto;
 
 public class ChartResponse {
 
-    private String label;
-    private long value;
+    private String m;
+    private int leads;
+    private int closing;
 
-    public ChartResponse(String label, long value) {
-        this.label = label;
-        this.value = value;
+    // Constructor 1: Untuk Dashboard Chart (3 Parameter)
+    public ChartResponse(String m, int leads, int closing) {
+        this.m = m;
+        this.leads = leads;
+        this.closing = closing;
     }
 
-    public String getLabel() { return label; }
-    public long getValue() { return value; }
+    // Constructor 2: Untuk statistik umum (2 Parameter) - AGAR TIDAK ERROR
+    public ChartResponse(String m, long leads) {
+        this.m = m;
+        this.leads = (int) leads;
+        this.closing = 0; // Default closing 0
+    }
+
+    // Getter & Setter (Sesuaikan dengan nama field m, leads, closing)
+    public String getM() { return m; }
+    public void setM(String m) { this.m = m; }
+    public int getLeads() { return leads; }
+    public void setLeads(int leads) { this.leads = leads; }
+    public int getClosing() { return closing; }
+    public void setClosing(int closing) { this.closing = closing; }
 }

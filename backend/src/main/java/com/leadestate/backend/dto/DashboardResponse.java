@@ -1,5 +1,7 @@
 package com.leadestate.backend.dto;
 
+import java.util.List;
+
 public class DashboardResponse {
 
     private long totalLeads;
@@ -15,35 +17,62 @@ public class DashboardResponse {
     private long closedLeads;
     private long activeLeads;
 
+    // Field Tambahan untuk Chart, Top Sales, dan Reminders
+    private List<ChartResponse> chartData;
+    private List<TopSalesResponse> topSales;
+    private List<ReminderResponse> reminders;
+
+    // Default Constructor (Berguna untuk library JSON seperti Jackson)
+    public DashboardResponse() {}
+
+    // Constructor Lengkap
     public DashboardResponse(long totalLeads, long totalFollowUps,
                             long pendingFollowUps, long doneFollowUps, long cancelledFollowUps,
                             long pendingReminders, long doneReminders,
-                            long closedLeads, long activeLeads) {
+                            long closedLeads, long activeLeads,
+                            List<ChartResponse> chartData,
+                            List<TopSalesResponse> topSales,
+                            List<ReminderResponse> reminders) {
 
         this.totalLeads = totalLeads;
         this.totalFollowUps = totalFollowUps;
-
         this.pendingFollowUps = pendingFollowUps;
         this.doneFollowUps = doneFollowUps;
         this.cancelledFollowUps = cancelledFollowUps;
-
         this.pendingReminders = pendingReminders;
         this.doneReminders = doneReminders;
-
         this.closedLeads = closedLeads;
         this.activeLeads = activeLeads;
+        this.chartData = chartData;
+        this.topSales = topSales;
+        this.reminders = reminders;
     }
 
+    // --- GETTER ---
     public long getTotalLeads() { return totalLeads; }
     public long getTotalFollowUps() { return totalFollowUps; }
-
     public long getPendingFollowUps() { return pendingFollowUps; }
     public long getDoneFollowUps() { return doneFollowUps; }
     public long getCancelledFollowUps() { return cancelledFollowUps; }
-
     public long getPendingReminders() { return pendingReminders; }
     public long getDoneReminders() { return doneReminders; }
-
     public long getClosedLeads() { return closedLeads; }
     public long getActiveLeads() { return activeLeads; }
+    public List<ChartResponse> getChartData() { return chartData; }
+    public List<TopSalesResponse> getTopSales() { return topSales; }
+    public List<ReminderResponse> getReminders() { return reminders; }
+
+    // --- SETTER ---
+    public void setTotalLeads(long totalLeads) { this.totalLeads = totalLeads; }
+    public void setTotalFollowUps(long totalFollowUps) { this.totalFollowUps = totalFollowUps; }
+    public void setPendingFollowUps(long pendingFollowUps) { this.pendingFollowUps = pendingFollowUps; }
+    public void setDoneFollowUps(long doneFollowUps) { this.doneFollowUps = doneFollowUps; }
+    public void setCancelledFollowUps(long cancelledFollowUps) { this.cancelledFollowUps = cancelledFollowUps; }
+    public void setPendingReminders(long pendingReminders) { this.pendingReminders = pendingReminders; }
+    public void setDoneReminders(long doneReminders) { this.doneReminders = doneReminders; }
+    public void setClosedLeads(long closedLeads) { this.closedLeads = closedLeads; }
+    public void setActiveLeads(long activeLeads) { this.activeLeads = activeLeads; }
+    public void setChartData(List<ChartResponse> chartData) { this.chartData = chartData; }
+    public void setTopSales(List<TopSalesResponse> topSales) { this.topSales = topSales; }
+    public void setReminders(List<ReminderResponse> reminders) { this.reminders = reminders; }
 }
