@@ -5,7 +5,10 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import ForgotPass from "./pages/ForgotPass";
-
+import Laporan from "./pages/Laporan";
+import DataLead from "./pages/dataLead";
+import ManajemenSalesPage from "./pages/ManajemenSalesPage";
+import ReminderPage from "./pages/ReminderPage";
 function App() {
   const [user, setUser] = useState(null);
 
@@ -49,11 +52,39 @@ function App() {
         />
 
         <Route 
+          path="/laporan" 
+          element={user ? <Laporan /> : <Navigate to="/" />} 
+        />
+
+        <Route 
           path="/settings" 
           element={
             user ? <Settings /> : <Navigate to="/" />
           } 
         />
+
+          <Route 
+          path="/Manajemen_sales" 
+          element={
+            user ? <ManajemenSalesPage /> : <Navigate to="/" />
+          } 
+        />
+
+          <Route 
+          path="/reminder" 
+          element={
+            user ? <ReminderPage /> : <Navigate to="/" />
+          } 
+        />
+
+        <Route
+          path="/dataLeads"
+          element={user ? <DataLead /> : <Navigate to="/" />}
+        />
+        {/* Alias route untuk konsistensi navigasi dari halaman lain */}
+        <Route path="/data-lead"      element={user ? <DataLead />            : <Navigate to="/" />} />
+        <Route path="/manajemen-sales" element={user ? <ManajemenSalesPage />  : <Navigate to="/" />} />
+        <Route path="/reminderPage"   element={user ? <ReminderPage />        : <Navigate to="/" />} />
 
       </Routes>
     </Router>
