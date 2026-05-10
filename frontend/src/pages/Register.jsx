@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import "../styles/register.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/leadestate-logo.png"; 
- 
+const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
  
 const STEPS = [
@@ -563,17 +564,22 @@ export default function Register() {
  
 const handleStep1 = async (data) => {
   try {
-    const res = await fetch(`http://localhost:8080/api/auth/check-email?email=${data.email}`);
-    
+    const res = await fetch(
+      `${API}/api/auth/check-email?email=${data.email}`
+    );
+
+    const msg = await res.text();
+
     if (res.ok) {
       setFormData((prev) => ({ ...prev, step1: data }));
       setCurrentStep(2);
     } else {
-      const msg = await res.text();
-      alert(msg); 
+      alert(msg);
     }
+
   } catch (err) {
-    alert("Koneksi gagal! Pastikan aplikasi Spring Boot kamu sudah jalan.");
+    console.error(err);
+    alert("Koneksi gagal! Pastikan backend aktif.");
   }
 };
  
@@ -582,26 +588,39 @@ const handleStep1 = async (data) => {
     setCurrentStep(3);
   };
  
-const handleSubmit = async () => {
-  const payload = {
-    name: `${formData.step1.firstName} ${formData.step1.lastName}`,
-    email: formData.step1.email,
-    password: formData.step1.password,
-    roleId: formData.step2.role === "admin" ? 1 : 2
+  const handleSubmit = async () => {
+    const payload = {
+      name: `${formData.step1.firstName} ${formData.step1.lastName}`,
+      email: formData.step1.email,
+      phone: formData.step2.phone.replace(/\D/g, ""),
+      password: formData.step1.password,
+      roleId: formData.step2.role === "admin" ? 1 : 3
+    };
+
+    try {
+      const res = await fetch(`${API}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.text();
+
+      if (!res.ok) {
+        throw new Error(data);
+      }
+
+      console.log("REGISTER SUCCESS:", data);
+
+      setIsDone(true);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Gagal simpan data.");
+    }
   };
-
-  try {
-    const res = await fetch('http://localhost:8080/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) setIsDone(true);
-  } catch (err) {
-    alert("Gagal simpan data.");
-  }
-};
  
   const rightScrollRef = useRef();
  

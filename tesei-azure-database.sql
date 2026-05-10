@@ -136,6 +136,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `phone` varchar(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -152,17 +153,19 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `role_id`, `created_at`) VALUES
-(1, 'Kepin', 'kepin@gmail.com', '12345', 1, '2026-04-06 14:08:37'),
-(2, 'Fathan', 'fathan@gmail.com', '12345', 3, '2026-04-06 14:08:37'),
-(3, 'Firasy', 'firasy@gmail.com', '12345', 1, '2026-04-06 14:08:37'),
-(4, 'Rafi', 'rafi@gmail.com', '12345', 3, '2026-04-06 14:08:37'),
-(5, 'John', 'john@gmail.com', '12345', 2, '2026-04-06 14:08:37'),
-(6, 'Jane Juliet', 'JaneImpal@gmail.com', '12345', 2, '2026-04-06 14:20:26'),
-(7, 'Bezos', 'JeffAsli@gmail.com', '12345', 1, '2026-04-06 14:20:26'),
-(8, 'Ilania', 'Ilania@gmail.com', '12345', 2, '2026-04-06 14:20:26'),
-(9, 'Nicole', 'NicoleReeyn@gmail.com', '12345', 3, '2026-04-06 14:20:26'),
-(10, 'Socrates', 'Socratesril@gmail.com', '12345', 1, '2026-04-06 14:20:26');
+INSERT INTO `users`
+(`id`, `name`, `email`, `phone`, `password`, `role_id`, `created_at`)
+VALUES
+(1, 'Kepin', 'kepin@gmail.com', '081234567801', '12345', 1, '2026-04-06 14:08:37'),
+(2, 'Fathan', 'fathan@gmail.com', '081234567802', '12345', 3, '2026-04-06 14:08:37'),
+(3, 'Firasy', 'firasy@gmail.com', '081234567803', '12345', 1, '2026-04-06 14:08:37'),
+(4, 'Rafi', 'rafi@gmail.com', '081234567804', '12345', 3, '2026-04-06 14:08:37'),
+(5, 'John', 'john@gmail.com', '081234567805', '12345', 2, '2026-04-06 14:08:37'),
+(6, 'Jane Juliet', 'JaneImpal@gmail.com', '081234567806', '12345', 2, '2026-04-06 14:20:26'),
+(7, 'Bezos', 'JeffAsli@gmail.com', '081234567807', '12345', 1, '2026-04-06 14:20:26'),
+(8, 'Ilania', 'Ilania@gmail.com', '081234567808', '12345', 2, '2026-04-06 14:20:26'),
+(9, 'Nicole', 'NicoleReeyn@gmail.com', '081234567809', '12345', 3, '2026-04-06 14:20:26'),
+(10, 'Socrates', 'Socratesril@gmail.com', '081234567810', '12345', 1, '2026-04-06 14:20:26');
 
 -- --------------------------------------------------------
 

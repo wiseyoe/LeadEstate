@@ -19,9 +19,11 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     long countByStatus_Id(int statusId);
 
     // Query kustom untuk mengambil statistik jumlah lead per status
-    @Query("SELECT l.status.id, l.status.statusName, COUNT(l) " +
+    // LEFT JOIN agar lead tanpa status tetap terhitung
+    @Query("SELECT COALESCE(l.status.statusName, 'Tidak Ada Status'), COUNT(l) " +
        "FROM Lead l " +
-       "GROUP BY l.status.id, l.status.statusName")
+       "LEFT JOIN l.status " +
+       "GROUP BY l.status.statusName")
     List<Object[]> countLeadsByStatus();
 
     // Lead per Month
@@ -31,13 +33,17 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
         "ORDER BY FUNCTION('MONTH', l.createdAt)")
     List<Object[]> countLeadsPerMonth();
 
-    // Performance per Sales
-    @Query("SELECT l.salesId, COUNT(l) " +
-        "FROM Lead l " +
-        "GROUP BY l.salesId")
+    // Performance per Sales — pakai native query agar dapat nama sales dari tabel users
+    @Query(value = """
+        SELECT u.name, COUNT(l.id)
+        FROM leads l
+        JOIN users u ON l.sales_id = u.id
+        GROUP BY u.name
+        ORDER BY COUNT(l.id) DESC
+    """, nativeQuery = true)
     List<Object[]> countLeadsBySales();
 
-    //Filter Leads
+    // Filter Leads
     @Query("SELECT l FROM Lead l WHERE " +
         "(:salesId IS NULL OR l.salesId = :salesId) AND " +
         "(:propertyId IS NULL OR l.propertyId = :propertyId) AND " +
@@ -61,7 +67,7 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     """, nativeQuery = true)
     List<Object[]> getTopSales();
 
-    //LEAD VS CLOSING PER BULAN
+    // LEAD VS CLOSING PER BULAN
     @Query(value = """
         SELECT 
         MONTH(created_at) as month,
@@ -72,4 +78,17 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
         ORDER BY MONTH(created_at)
     """, nativeQuery = true)
     List<Object[]> getChartData();
+
+    // Sumber Lead
+    @Query("SELECT l.source, COUNT(l) FROM Lead l GROUP BY l.source ORDER BY COUNT(l) DESC")
+    List<Object[]> countLeadsBySource();
+
+    // ── BARU: Estimasi revenue dari lead Closed (status_id = 5) × harga property
+    @Query(value = """
+        SELECT COALESCE(SUM(p.price), 0)
+        FROM leads l
+        JOIN properties p ON l.property_id = p.id
+        WHERE l.status_id = 5
+    """, nativeQuery = true)
+    double sumEstimatedRevenue();
 }

@@ -44,8 +44,9 @@ public class ReportService {
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            String statusName = (String) row[1];
-            long count = ((Number) row[2]).longValue();
+            // Query sekarang return 2 kolom: [statusName, COUNT]
+            String statusName = row[0] != null ? (String) row[0] : "Tidak Ada Status";
+            long count = ((Number) row[1]).longValue();
 
             response.add(new ChartResponse(statusName, count));
         }
@@ -53,19 +54,21 @@ public class ReportService {
         return response;
     }
 
-    // Lead per Month
+    // Lead per Month (dengan closing)
     public List<ChartResponse> getLeadPerMonthReport() {
 
-        List<Object[]> results = leadRepository.countLeadsPerMonth();
+        List<Object[]> results = leadRepository.getChartData();
         List<ChartResponse> response = new ArrayList<>();
 
         String[] months = {"Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"};
 
         for (Object[] row : results) {
+            // getChartData return: [month(int), leads(long), closing(long)]
             int monthIndex = ((Number) row[0]).intValue();
-            long count = ((Number) row[1]).longValue();
+            long leads     = ((Number) row[1]).longValue();
+            long closing   = ((Number) row[2]).longValue();
 
-            response.add(new ChartResponse(months[monthIndex - 1], count));
+            response.add(new ChartResponse(months[monthIndex - 1], (int) leads, (int) closing));
         }
 
         return response;
@@ -78,10 +81,25 @@ public class ReportService {
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            int salesId = ((Number) row[0]).intValue();
+            // Query sekarang return [nama sales, COUNT] dari JOIN ke tabel users
+            String salesName = row[0] != null ? (String) row[0] : "Unknown";
             long count = ((Number) row[1]).longValue();
 
-            response.add(new ChartResponse("Sales " + salesId, count));
+            response.add(new ChartResponse(salesName, count));
+        }
+
+        return response;
+    }
+
+    // Sumber Lead (field source di tabel leads)
+    public List<ChartResponse> getLeadSourceReport() {
+        List<Object[]> results = leadRepository.countLeadsBySource();
+        List<ChartResponse> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            String source = row[0] != null ? (String) row[0] : "Lainnya";
+            long count = ((Number) row[1]).longValue();
+            response.add(new ChartResponse(source, count));
         }
 
         return response;
