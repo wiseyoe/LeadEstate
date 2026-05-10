@@ -18,10 +18,10 @@ public class Lead {
     private String email;
 
     @Column(name = "property_id")
-    private int propertyId;
+    private Integer propertyId;
 
     @Column(name = "sales_id")
-    private int salesId;
+    private Integer salesId;
 
     @ManyToOne
     @JoinColumn(name = "status_id")
@@ -32,15 +32,11 @@ public class Lead {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // =============================
-    // METHOD SESUAI SEQUENCE DIAGRAM
-    // =============================
-
     public void changeStatus(LeadStatus newStatus) {
         this.status = newStatus;
     }
 
-    public void assignToSales(int newSalesId) {
+    public void assignToSales(Integer newSalesId) {
         this.salesId = newSalesId;
     }
 }

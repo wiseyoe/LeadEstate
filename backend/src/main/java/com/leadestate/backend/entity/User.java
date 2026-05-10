@@ -12,6 +12,10 @@ public class User {
 
     private String name;
     private String email;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
     private String password;
 
     @Column(name="role_id")
@@ -63,5 +67,13 @@ public class User {
 
     public boolean isSales() {
         return this.roleId != null && this.roleId == 3;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
