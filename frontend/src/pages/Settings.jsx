@@ -19,13 +19,29 @@ const INTEGRATIONS = [
   { logo: "📊", name: "Google Sheets",         desc: "Sync data lead ke spreadsheet",      connected: true  },
 ];
 
-const TEAM = [
-  { name: "Admin Rafi",     role: "Administrator", email: "admin@leadestate.id", color: "#f59e0b", status: "online",  isMe: true  },
+// TEAM data - "isMe" item akan di-override dengan data user login
+const TEAM_STATIC = [
   { name: "Budi Wicaksono", role: "Senior Sales",  email: "budi@leadestate.id",  color: "#6366f1", status: "online",  isMe: false },
   { name: "Sari Rahayu",    role: "Senior Sales",  email: "sari@leadestate.id",  color: "#10b981", status: "offline", isMe: false },
   { name: "Dian Hartono",   role: "Sales Agent",   email: "dian@leadestate.id",  color: "#ef4444", status: "offline", isMe: false },
   { name: "Fajar Kusuma",   role: "Junior Sales",  email: "fajar@leadestate.id", color: "#8b5cf6", status: "offline", isMe: false },
 ];
+
+// ── USER HELPER (module level agar bisa diakses semua komponen) ──────────────
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
+}
+function getUserInitials() {
+  const name = getCurrentUser().name || "U";
+  return name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+}
+function getUserRole() {
+  const role = getCurrentUser().role;
+  return role === "Admin" ? "Administrator"
+    : role === "Supervisor" ? "Supervisor"
+    : role === "Sales" ? "Sales"
+    : role || "Administrator";
+}
 
 const DANGER_ITEMS = [
   {
@@ -115,7 +131,7 @@ function SectionProfil({ onDirty, showToast }) {
         {/* Avatar */}
         <div className="avatar-section">
           <div className="big-av">
-            AR
+            {getUserInitials()}
             <div className="av-edit">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
@@ -123,8 +139,8 @@ function SectionProfil({ onDirty, showToast }) {
             </div>
           </div>
           <div className="av-info">
-            <div className="av-name">Admin Rafi</div>
-            <div className="av-role">Administrator · admin@leadestate.id</div>
+            <div className="av-name">{getCurrentUser().name || "User"}</div>
+            <div className="av-role">{getUserRole()} · {getCurrentUser().email || ""}</div>
             <div className="av-actions">
               <button className="av-btn primary" onClick={() => showToast("Foto profil diperbarui")}>
                 Ganti Foto
@@ -325,7 +341,7 @@ function SectionTim({ showToast }) {
         }
       />
       <div>
-        {TEAM.map((member) => (
+        {[{ name: getCurrentUser().name||'User', role: getUserRole(), email: getCurrentUser().email||'', color:'#f59e0b', status:'online', isMe:true }, ...TEAM_STATIC].map((member) => (
           <div key={member.email} className="sec-row">
             <div className="team-avatar" style={{ background: member.color }}>
               {initials(member.name)}
@@ -429,6 +445,11 @@ export default function Settings() {
   const toastTimer                    = { current: null };
   const navigate = useNavigate();
 
+  // User dari localStorage - pakai helper functions yang sudah di module level
+  const currentUser  = getCurrentUser();
+  const userInitials = getUserInitials();
+  const userRole     = getUserRole();
+
   const showToast = (msg) => {
     clearTimeout(toastTimer.current);
     setToast(msg);
@@ -486,7 +507,7 @@ export default function Settings() {
             Dashboard
             </div>
 
-          <div className="nav-item">
+          <div className="nav-item" onClick={() => navigate("/reminder")}>
             <span className="nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -497,7 +518,7 @@ export default function Settings() {
             <span className="nav-badge">5</span>
           </div>
 
-          <div className="nav-item">
+          <div className="nav-item" onClick={() => navigate("/dataLeads")}>
             <span className="nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -509,7 +530,7 @@ export default function Settings() {
             Data Lead
           </div>
 
-          <div className="nav-item">
+          <div className="nav-item" onClick={() => navigate("/Manajemen_sales")}>
             <span className="nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="3" width="20" height="18" rx="2" />
@@ -523,7 +544,7 @@ export default function Settings() {
           {/* ── Laporan ── */}
           <div className="nav-label">Laporan</div>
 
-          <div className="nav-item">
+          <div className="nav-item" onClick={() => navigate("/laporan")}>
             <span className="nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="20" x2="18" y2="10" />
@@ -549,10 +570,10 @@ export default function Settings() {
 
         {/* Footer */}
         <div className="sidebar-footer">
-          <div className="s-av">AR</div>
+          <div className="s-av">{userInitials}</div>
           <div className="user-info">
-            <div className="name">Admin Rafi</div>
-            <div className="role">Administrator</div>
+            <div className="name">{getCurrentUser().name || "User"}</div>
+            <div className="role">{getUserRole()}</div>
           </div>
         </div>
 
@@ -565,7 +586,7 @@ export default function Settings() {
         <div className="topbar">
           <div className="topbar-title">Pengaturan</div>
           <div className="topbar-right">
-            <div className="date-chip">📅 Jum&apos;at, 20 Maret 2026</div>
+            <div className="date-chip">📅 {new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
             <div className="notif-btn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
                 <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />

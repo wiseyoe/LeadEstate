@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import "../styles/ForgotPass.css";
 import { useNavigate } from "react-router-dom";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -183,7 +184,31 @@ function Panel1({ onNext, navigate }) {
     }
     setError("");
     setLoading(true);
-    setTimeout(() => { setLoading(false); onNext(em); }, 1400);
+    fetch(`${API}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: em,
+      }),
+    })
+      .then(async (res) => {
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data);
+        }
+
+        setLoading(false);
+
+        onNext(em, data.token);
+      })
+      .catch((err) => {
+        setLoading(false);
+        setError(err.message);
+      });
   };
 
   useEffect(() => {
@@ -290,31 +315,69 @@ function Panel2({ email, onNext, onBack }) {
   };
 
   const verifyCode = (code) => {
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (code === OTP_DEMO.current) {
-        clearInterval(timerRef.current);
-        onNext();
-      } else {
-        setError(`Kode OTP salah. Demo kode: ${OTP_DEMO.current}`);
+
+    fetch(`${API}/api/auth/validate-token?token=${code}`)
+      .then(async (res) => {
+
+        const data = await res.text();
+
+        if (!res.ok) {
+          throw new Error(data);
+        }
+
+        setLoading(false);
+
+        onNext(code);
+      })
+      .catch((err) => {
+
+        setLoading(false);
+
+        setError(err.message);
+
         setOtp(["", "", "", "", "", ""]);
+
         setShake(true);
+
         setTimeout(() => setShake(false), 600);
+
         inputRefs.current[0]?.focus();
-      }
-    }, 1200);
+      });
   };
 
   const handleVerify = () => verifyCode(otp.join(""));
 
   const handleResend = () => {
-    setOtp(["", "", "", "", "", ""]);
-    inputRefs.current[0]?.focus();
-    OTP_DEMO.current = String(Math.floor(100000 + Math.random() * 900000));
-    setError(`Kode baru dikirim! Demo kode: ${OTP_DEMO.current}`);
-    setExpired(false);
-    startTimer(300);
+    fetch(`${API}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+      }),
+    })
+      .then(async (res) => {
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data);
+        }
+
+        setOtp(["", "", "", "", "", ""]);
+        setError("OTP baru berhasil dikirim");
+        setExpired(false);
+
+        startTimer(300);
+
+        inputRefs.current[0]?.focus();
+      })
+      .catch((err) => {
+        setError(err.message);
+      });
   };
 
   useEffect(() => {
@@ -379,7 +442,7 @@ function Panel2({ email, onNext, onBack }) {
 
 // ─── PANEL 3: NEW PASSWORD ────────────────────────────────────────────────────
 
-function Panel3({ onNext }) {
+function Panel3({ token, onNext }) {
   const [showNew,   setShowNew]   = useState(false);
   const [showConf,  setShowConf]  = useState(false);
   const [passVal,   setPassVal]   = useState("");
@@ -411,11 +474,44 @@ function Panel3({ onNext }) {
   const handleReset = () => {
     const pw  = passVal;
     const cpw = confRef.current?.value;
-    if (pw.length < 8)  return setError("Password minimal 8 karakter.");
-    if (pw !== cpw)     return setError("Konfirmasi password tidak cocok.");
+    if (pw.length < 8)  
+      return setError("Password minimal 8 karakter.");
+
+    if (pw !== cpw)     
+      return setError("Konfirmasi password tidak cocok.");
+
     setError("");
+
     setLoading(true);
-    setTimeout(() => { setLoading(false); onNext(); }, 1500);
+
+    fetch(`${API}/api/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        newPassword: pw,
+      }),
+    })
+      .then(async (res) => {
+
+        const data = await res.text();
+
+        if (!res.ok) {
+          throw new Error(data);
+        }
+
+        setLoading(false);
+
+        onNext();
+      })
+      .catch((err) => {
+
+        setLoading(false);
+
+        setError(err.message);
+      });
   };
 
   useEffect(() => {
@@ -547,10 +643,12 @@ function Panel4({ navigate }) {
 export default function ForgotPassword() {
   const [panel, setPanel] = useState(1);
   const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const navigate = useNavigate();
 
-  const handleEmailNext = (em) => {
+  const handleEmailNext = (em, tk) => {
     setEmail(em);
+    setToken(tk);
     setPanel(2);
   };
 
@@ -560,16 +658,36 @@ export default function ForgotPassword() {
 
       <div className="fp-right">
         <div className="fp-form-box">
-          {panel === 1 && <Panel1 onNext={handleEmailNext} navigate={navigate} />}
+
+          {panel === 1 && (
+            <Panel1
+              onNext={handleEmailNext}
+              navigate={navigate}
+            />
+          )}
+
           {panel === 2 && (
             <Panel2
               email={email}
-              onNext={() => setPanel(3)}
+              onNext={(verifiedToken) => {
+                setToken(verifiedToken);
+                setPanel(3);
+              }}
               onBack={() => setPanel(1)}
             />
           )}
-          {panel === 3 && <Panel3 onNext={() => setPanel(4)} />}
-          {panel === 4 && <Panel4 navigate={navigate}/>}
+
+          {panel === 3 && (
+            <Panel3
+              token={token}
+              onNext={() => setPanel(4)}
+            />
+          )}
+
+          {panel === 4 && (
+            <Panel4 navigate={navigate} />
+          )}
+
         </div>
       </div>
     </div>

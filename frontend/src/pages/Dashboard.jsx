@@ -148,12 +148,21 @@ export default function LeadEstateDashboard() {
   
   // 1. Integrasi API
   const [dashboardData, setDashboardData] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchDashboard();
+
+    // Ambil user login dari localStorage
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) setCurrentUser(JSON.parse(userData));
+    } catch(e) {
+      console.error("Parse user error:", e);
+    }
   }, []);
 
   const fetchDashboard = async () => {
@@ -209,7 +218,10 @@ export default function LeadEstateDashboard() {
 
           <div
             className={`le-nav-item${activeNav === "reminder" ? " active" : ""}`}
-            onClick={() => setActiveNav("reminder")}
+            onClick={() => {
+              setActiveNav("reminder");
+              navigate("/reminder");
+            }}
           >
             <span className="le-nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -223,7 +235,10 @@ export default function LeadEstateDashboard() {
 
           <div
             className={`le-nav-item${activeNav === "lead" ? " active" : ""}`}
-            onClick={() => setActiveNav("lead")}
+           onClick={() => {
+              setActiveNav("lead");
+              navigate("/dataLeads");
+            }}
           >
             <span className="le-nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -238,7 +253,10 @@ export default function LeadEstateDashboard() {
 
           <div
             className={`le-nav-item${activeNav === "sales" ? " active" : ""}`}
-            onClick={() => setActiveNav("sales")}
+             onClick={() => {
+              setActiveNav("sales");
+              navigate("/Manajemen_sales");
+            }}
           >
             <span className="le-nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -254,7 +272,10 @@ export default function LeadEstateDashboard() {
 
           <div
             className={`le-nav-item${activeNav === "report" ? " active" : ""}`}
-            onClick={() => setActiveNav("report")}
+           onClick={() => {
+                setActiveNav("report");
+                navigate("/laporan");
+              }}
           >
             <span className="le-nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -286,10 +307,17 @@ export default function LeadEstateDashboard() {
 
         {/* Footer */}
         <div className="le-sidebar-footer">
-          <div className="le-avatar">AR</div>
+          <div className="le-avatar">
+            {currentUser?.name?.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase() || "A"}
+          </div>
           <div>
-            <div className="le-user-name">Admin Rafi</div>
-            <div className="le-user-role">Administrator</div>
+            <div className="le-user-name">{currentUser?.name || "User"}</div>
+            <div className="le-user-role">
+              {currentUser?.role === "Admin" ? "Administrator"
+               : currentUser?.role === "Supervisor" ? "Supervisor"
+               : currentUser?.role === "Sales" ? "Sales"
+               : currentUser?.role || "Administrator"}
+            </div>
           </div>
         </div>
       </aside>
@@ -299,7 +327,7 @@ export default function LeadEstateDashboard() {
         <div className="le-topbar">
           <div className="le-topbar-title">Dashboard Overview</div>
           <div className="le-topbar-right">
-            <div className="le-date-chip">📅 Jum'at, 20 Maret 2026</div>
+            <div className="le-date-chip">📅 {new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
             <div className="le-notif-btn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
                 <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
