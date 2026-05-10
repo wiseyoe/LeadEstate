@@ -9,7 +9,6 @@ import com.leadestate.backend.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -49,18 +48,48 @@ public class AuthService {
         String roleName = switch (user.getRoleId() != null ? user.getRoleId() : 0) {
             case 1 -> "Admin";
             case 3 -> "Sales";
-            default -> "Unknown";
+            default -> "Supervisor";
         };
 
         return new UserResponse(
             user.getId(),
             user.getName(),
             user.getEmail(),
-            roleName
+            roleName,
+            user.getPhone()
         );
     }
 
     public User register(User user) {
+
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new RuntimeException("Nama wajib diisi");
+        }
+
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new RuntimeException("Email wajib diisi");
+        }
+
+        if (user.getPhone() == null || user.getPhone().isBlank()) {
+            throw new RuntimeException("Nomor telepon wajib diisi");
+        }
+
+        if (!user.getPhone().matches("^\\d{10,15}$")) {
+            throw new RuntimeException("Nomor telepon tidak valid");
+        }
+
+        if (user.getPassword() == null || user.getPassword().length() < 8) {
+            throw new RuntimeException("Password minimal 8 karakter");
+        }
+
+        if (user.getRoleId() == null) {
+            throw new RuntimeException("Role wajib dipilih");
+        }
+
+        if (user.getRoleId() != 1 && user.getRoleId() != 3) {
+            throw new RuntimeException("Role tidak valid");
+        }
+
         userRepository.findByEmail(user.getEmail()).ifPresent(u -> {
             throw new RuntimeException("Email sudah terdaftar!");
         });
@@ -80,7 +109,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email tidak ditemukan"));
 
-        String token = UUID.randomUUID().toString();
+        String token;
+        do {
+            token = String.valueOf((int)(Math.random() * 900000) + 100000);
+        } while (resetTokens.containsKey(token));
 
         resetTokens.put(token, user.getEmail());
 
@@ -112,6 +144,23 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        //validasi password baru
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new RuntimeException("Password minimal 8 karakter");
+        }
+
+        if (!newPassword.matches(".*[A-Z].*")) {
+            throw new RuntimeException("Password harus mengandung huruf besar");
+        }
+
+        if (!newPassword.matches(".*\\d.*")) {
+            throw new RuntimeException("Password harus mengandung angka");
+        }
+
+        if (!newPassword.matches(".*[^A-Za-z0-9].*")) {
+            throw new RuntimeException("Password harus mengandung karakter spesial");
+        }
 
         if (user.getPassword().equals(newPassword)) {
             throw new RuntimeException("Gagal update: password baru tidak boleh sama dengan password lama");
