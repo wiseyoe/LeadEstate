@@ -6,13 +6,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.leadestate.backend.service.AuthService;
 import com.leadestate.backend.entity.User;
+import com.leadestate.backend.dto.RegisterRequest;
 import com.leadestate.backend.dto.UserResponse;
+
+import com.leadestate.backend.dto.ForgotPasswordRequest;
+import com.leadestate.backend.dto.ResetPasswordRequest;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -32,10 +36,20 @@ public class AuthController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
-            User newUser = authService.register(user); 
-            return ResponseEntity.ok(newUser);
+
+            User user = new User();
+            user.setName(req.getName());
+            user.setEmail(req.getEmail());
+            user.setPhone(req.getPhone());
+            user.setPassword(req.getPassword());
+            user.setRoleId(req.getRoleId());
+
+            authService.register(user);
+
+            return ResponseEntity.ok("Register berhasil");
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -48,13 +62,19 @@ public class AuthController {
         }
         return ResponseEntity.ok("Email tersedia");
     }
+    
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> req) {
-        String email = req.get("email");
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
 
         try {
-            String token = authService.createResetToken(email);
-            return ResponseEntity.ok("Token reset: " + token);
+
+            String token = authService.createResetToken(req.getEmail());
+
+            return ResponseEntity.ok(Map.of(
+                "message", "OTP berhasil dikirim",
+                "token", token
+            ));
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -64,20 +84,27 @@ public class AuthController {
     public ResponseEntity<?> validateToken(@RequestParam String token) {
         try {
             String email = authService.validateToken(token);
-            return ResponseEntity.ok("Token valid untuk email: " + email);
+            return ResponseEntity.ok(Map.of(
+                "message", "Token valid",
+                "email", email
+            ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> req) {
-        String token = req.get("token");
-        String newPassword = req.get("newPassword");
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
 
         try {
-            authService.resetPassword(token, newPassword);
+
+            authService.resetPassword(
+                req.getToken(),
+                req.getNewPassword()
+            );
+
             return ResponseEntity.ok("Password berhasil diupdate");
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

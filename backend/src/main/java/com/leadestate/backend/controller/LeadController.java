@@ -67,4 +67,18 @@ public class LeadController {
             leadService.updateStatus(id, body.get("statusId"))
         );
     }
+    // =========================
+// FR - Edit Lead
+// =========================
+@PutMapping("/{id}")
+public ResponseEntity<?> updateLead(
+        @PathVariable int id,
+        @RequestBody LeadRequest request
+) {
+
+    return ResponseEntity.ok(
+            leadService.updateLead(id, request)
+    );
+}
+    
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/report")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class ReportController {
 
     @Autowired
@@ -48,6 +48,12 @@ public class ReportController {
     @GetMapping("/sales-performance")
     public Object getSalesPerformanceReport() {
         return reportService.getSalesPerformanceReport();
+    }
+
+    // Sumber Lead
+    @GetMapping("/lead-source")
+    public Object getLeadSourceReport() {
+        return reportService.getLeadSourceReport();
     }
 
     // FilterLeads
