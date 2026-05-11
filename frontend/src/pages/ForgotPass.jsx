@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import "../styles/ForgotPass.css";
+import "../styles/Forgotpass.css";
 import { useNavigate } from "react-router-dom";
 const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
