@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import "../styles/register.css";
+import "../styles/Register.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/leadestate-logo.png"; 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
