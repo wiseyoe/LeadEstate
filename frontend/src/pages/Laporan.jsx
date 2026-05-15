@@ -504,11 +504,13 @@ function SalesRanking() {
   );
 
   const rawList = Array.isArray(data) ? data : [];
-  // Backend return: { m: "Sales 2", leads: 3, closing: 0 }
-  const sorted = [...rawList].sort((a, b) =>
-    (b.leads ?? b.count ?? b.closingCount ?? 0) - (a.leads ?? a.count ?? a.closingCount ?? 0)
-  );
-  const max = sorted[0] ? (sorted[0].leads ?? sorted[0].count ?? sorted[0].closingCount ?? 1) : 1;
+  // Backend getTopSales() return ChartResponse(salesName, 0, closingCount)
+  // → field: m = nama sales, leads = 0, closing = jumlah closing
+  // Sort by closing DESC, top 5
+  const sorted = [...rawList]
+    .sort((a, b) => (b.closing ?? 0) - (a.closing ?? 0))
+    .slice(0, 5);
+  const max = sorted[0]?.closing ?? 1;
   const rankCls = (i) => (i === 0 ? "r1" : i === 1 ? "r2" : i === 2 ? "r3" : "r-oth");
   const initials = (name = "") => name.split(" ").map((w) => w[0]).join("").substring(0, 2).toUpperCase();
 
@@ -522,7 +524,7 @@ function SalesRanking() {
         {sorted.map((s, i) => {
           // Backend return: { m: "Sales 2", leads: 3, closing: 0 }
           const name    = s.m ?? s.salesName ?? s.name ?? s.label ?? "–";
-          const closing = s.leads ?? s.count ?? s.closingCount ?? s.closing ?? 0;
+          const closing = s.closing ?? 0; // dari ChartResponse.closing (getTopSales)
           const color   = SALES_COLORS[i % SALES_COLORS.length];
           return (
             <div key={`sales-${i}-${name}`} className="rt-row">
@@ -640,12 +642,13 @@ function ConversionFunnel() {
       return statuses.includes(statusName);
     }).length;
 
+  // Warna & label konsisten dengan Status Lead di DonutChart
   const funnelSteps = [
-    { label: "Lead Masuk",  val: total,                                    color: FUNNEL_COLORS[0] },
-    { label: "Dihubungi",   val: countByStatus(["Contacted"]),             color: FUNNEL_COLORS[1] },
-    { label: "Tertarik",    val: countByStatus(["Follow Up"]),             color: FUNNEL_COLORS[2] },
-    { label: "Negosiasi",   val: countByStatus(["Negotiation"]),           color: FUNNEL_COLORS[3] },
-    { label: "Closing",     val: countByStatus(["Closed"]),                color: FUNNEL_COLORS[4] },
+    { label: "Lead Masuk",  val: total,                          color: "#3b82f6" }, // sama dgn New Lead
+    { label: "Contacted",   val: countByStatus(["Contacted"]),   color: "#f59e0b" }, // sama dgn Contacted
+    { label: "Follow Up",   val: countByStatus(["Follow Up"]),   color: "#8b5cf6" }, // sama dgn Follow Up
+    { label: "Negotiation", val: countByStatus(["Negotiation"]), color: "#f97316" }, // sama dgn Negotiation
+    { label: "Closed",      val: countByStatus(["Closed"]),      color: "#22c55e" }, // sama dgn Closed
   ];
 
   const max = funnelSteps[0].val || 1;
@@ -876,12 +879,7 @@ export default function LeadEstateLaporan() {
             <div className="topbar-title">Laporan &amp; Statistik</div>
             <div className="topbar-right">
               <div className="date-chip">📅 {now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
-              <div className="notif-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
-                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                </svg>
-                <div className="notif-dot" />
-              </div>
+
             </div>
           </div>
 
@@ -918,9 +916,6 @@ export default function LeadEstateLaporan() {
               <select className="period-select">
                 <option>Semua Sales</option>
               </select>
-              <button className="export-btn" onClick={() => alert("Export PDF...")}>
-                <IconExport /> Export PDF
-              </button>
               <button className="print-btn" onClick={() => window.print()}>
                 🖨️ Print
               </button>
