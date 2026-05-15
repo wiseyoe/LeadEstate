@@ -74,18 +74,21 @@ public class ReportService {
         return response;
     }
 
-    // Performance per Sales
+    // Performance per Sales — berdasarkan jumlah CLOSING (status_id = 5)
     public List<ChartResponse> getSalesPerformanceReport() {
 
-        List<Object[]> results = leadRepository.countLeadsBySales();
+        // Pakai getTopSales() yang sudah filter WHERE status_id = 5
+        List<Object[]> results = leadRepository.getTopSales();
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            // Query sekarang return [nama sales, COUNT] dari JOIN ke tabel users
+            // getTopSales return: [name(String), COUNT(long)]
             String salesName = row[0] != null ? (String) row[0] : "Unknown";
-            long count = ((Number) row[1]).longValue();
+            long closingCount = ((Number) row[1]).longValue();
 
-            response.add(new ChartResponse(salesName, count));
+            // Pakai constructor (m, leads, closing):
+            // m = nama sales, leads = 0 (tidak dipakai), closing = jumlah closing
+            response.add(new ChartResponse(salesName, 0, (int) closingCount));
         }
 
         return response;

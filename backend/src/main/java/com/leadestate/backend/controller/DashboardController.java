@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.leadestate.backend.dto.ChartResponse;
 import com.leadestate.backend.service.DashboardService;
+import com.leadestate.backend.service.AuthService;
 
-// Import tambahan agar List dan Map terbaca
 import java.util.List;
 
 @RestController
@@ -17,23 +17,50 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    // Endpoint lama untuk ringkasan angka dashboard
+    @Autowired
+    private AuthService authService;
+
+    /**
+     * Dashboard Summary
+     * Admin only
+     */
     @GetMapping
-    public ResponseEntity<?> getDashboard() {
-        return ResponseEntity.ok(dashboardService.getDashboardData());
+    public ResponseEntity<?> getDashboard(
+            @RequestHeader("Role") String role
+    ) {
+
+        authService.checkSalesOrAdmin(role);
+
+        return ResponseEntity.ok(
+                dashboardService.getDashboardData()
+        );
     }
 
     /**
-     * Implementasi Endpoint Baru untuk Chart
-     * URL: GET http://localhost:8080/api/dashboard/leads-by-status
+     * Leads by Status Chart
+     * Admin only
      */
     @GetMapping("/leads-by-status")
-    public List<ChartResponse> getLeadsByStatus() {
+    public List<ChartResponse> getLeadsByStatus(
+            @RequestHeader("Role") String role
+    ) {
+
+        authService.checkAdmin(role);
+
         return dashboardService.getLeadsByStatus();
     }
 
+    /**
+     * Sales Performance Chart
+     * Admin only
+     */
     @GetMapping("/sales-performance")
-    public List<ChartResponse> getSalesPerformance() {
+    public List<ChartResponse> getSalesPerformance(
+            @RequestHeader("Role") String role
+    ) {
+
+        authService.checkAdmin(role);
+
         return dashboardService.getSalesPerformance();
     }
 }
