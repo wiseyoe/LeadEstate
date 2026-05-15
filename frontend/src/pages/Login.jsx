@@ -17,34 +17,56 @@ const API = import.meta.env.VITE_API_URL || "";
 //test API
 console.log("API URL:", API);
 
+
 const handleLogin = async (e) => {
+  console.log("HANDLE LOGIN KEJALAN");
+
   if (e) e.preventDefault();
 
-//test API
-console.log("API URL:", API);
+  console.log("SETELAH PREVENT");
 
   setError("");
+
+  console.log("EMAIL:", email);
+  console.log("PASSWORD:", password);
 
   if (!email) return setError("Email tidak boleh kosong.");
   if (!password) return setError("Password tidak boleh kosong.");
 
   try {
+    console.log("MASUK TRY");
+
     setLoading(true);
+
+    console.log("SEBELUM AXIOS");
 
     const res = await axios.post(`${API}/api/auth/login`, {
       email,
       password,
     });
 
-    console.log("LOGIN SUCCESS:", res.data);
+    // TAMBAHKAN BARIS INI:
+    console.log("ROLE:", res.data.role);
+console.log("CEK DATA DARI SERVER:", res.data); 
+alert("Isi data server: " + JSON.stringify(res.data)); // Ini akan muncul kotak pesan di layar
+
+localStorage.setItem("user", JSON.stringify(res.data));
+setUser(res.data);
+navigate("/dashboard");
+
+    console.log("SESUDAH AXIOS");
+    console.log("FULL RESPONSE:", res);
+    console.log("DATA:", res.data);
 
     localStorage.setItem("user", JSON.stringify(res.data));
+
     setUser(res.data);
 
     navigate("/dashboard");
 
   } catch (err) {
-    console.error(err);
+    console.error("LOGIN ERROR:", err);
+
     setError("Email atau password salah");
   } finally {
     setLoading(false);

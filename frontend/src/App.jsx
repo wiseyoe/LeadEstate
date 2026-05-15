@@ -9,15 +9,32 @@ import Laporan from "./pages/Laporan";
 import DataLead from "./pages/dataLead";
 import ManajemenSalesPage from "./pages/ManajemenSalesPage";
 import ReminderPage from "./pages/ReminderPage";
+
+
 function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+
     if (storedUser) {
-      setUser(storedUser);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+
+        console.log("USER DARI LOCALSTORAGE:", parsedUser);
+
+        setUser(parsedUser);
+
+      } catch (err) {
+        console.error("Gagal parse user:", err);
+
+        localStorage.removeItem("user");
+      }
     }
   }, []);
+
+  const isAdmin =
+    user?.role?.toLowerCase() === "admin";
 
   return (
     <Router>
@@ -51,9 +68,13 @@ function App() {
           } 
         />
 
-        <Route 
-          path="/laporan" 
-          element={user ? <Laporan /> : <Navigate to="/" />} 
+        <Route
+          path="/laporan"
+          element={
+            user && isAdmin
+              ? <Laporan />
+              : <Navigate to="/dashboard" />
+          }
         />
 
         <Route 
@@ -63,12 +84,14 @@ function App() {
           } 
         />
 
-          <Route 
-          path="/Manajemen_sales" 
-          element={
-            user ? <ManajemenSalesPage /> : <Navigate to="/" />
-          } 
-        />
+          <Route
+            path="/Manajemen_sales"
+            element={
+              user && isAdmin
+                ? <ManajemenSalesPage />
+                : <Navigate to="/dashboard" />
+            }
+          />
 
           <Route 
           path="/reminder" 
@@ -83,7 +106,16 @@ function App() {
         />
         {/* Alias route untuk konsistensi navigasi dari halaman lain */}
         <Route path="/data-lead"      element={user ? <DataLead />            : <Navigate to="/" />} />
-        <Route path="/manajemen-sales" element={user ? <ManajemenSalesPage />  : <Navigate to="/" />} />
+        
+        <Route
+          path="/manajemen-sales"
+          element={
+            user && isAdmin
+              ? <ManajemenSalesPage />
+              : <Navigate to="/dashboard" />
+          }
+        />
+
         <Route path="/reminderPage"   element={user ? <ReminderPage />        : <Navigate to="/" />} />
 
       </Routes>

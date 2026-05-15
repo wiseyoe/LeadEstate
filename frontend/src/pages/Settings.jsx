@@ -70,7 +70,11 @@ const NAV_ITEMS = [
   { id: "keamanan",   icon: "🔒", label: "Keamanan",        group: "Akun"    },
   { id: "notifikasi", icon: "🔔", label: "Notifikasi",      group: "Sistem"  },
   { id: "integrasi",  icon: "🔗", label: "Integrasi",       group: "Sistem"  },
-  { id: "tim",        icon: "👥", label: "Manajemen Tim",   group: "Tim"     },
+
+  ...(getCurrentUser()?.role?.toLowerCase() === "admin"
+    ? [{ id: "tim", icon: "👥", label: "Manajemen Tim", group: "Tim" }]
+    : []),
+
   { id: "bahaya",     icon: "⚠️", label: "Zona Bahaya",     group: "Lainnya" },
 ];
 
@@ -447,6 +451,8 @@ export default function Settings() {
 
   // User dari localStorage - pakai helper functions yang sudah di module level
   const currentUser  = getCurrentUser();
+  const isAdmin =
+    currentUser?.role?.toLowerCase() === "admin";
   const userInitials = getUserInitials();
   const userRole     = getUserRole();
 
@@ -530,30 +536,35 @@ export default function Settings() {
             Data Lead
           </div>
 
-          <div className="nav-item" onClick={() => navigate("/Manajemen_sales")}>
-            <span className="nav-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="3" width="20" height="18" rx="2" />
-                <circle cx="12" cy="10" r="3" />
-                <path d="M7 21v-1a5 5 0 0 1 10 0v1" />
-              </svg>
-            </span>
-            Manajemen Sales
-          </div>
+          {/* ADMIN ONLY */}
+          {isAdmin && (
+            <>
+              <div className="nav-item" onClick={() => navigate("/Manajemen_sales")}>
+                <span className="nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="20" height="18" rx="2" />
+                    <circle cx="12" cy="10" r="3" />
+                    <path d="M7 21v-1a5 5 0 0 1 10 0v1" />
+                  </svg>
+                </span>
+                Manajemen Sales
+              </div>
 
-          {/* ── Laporan ── */}
-          <div className="nav-label">Laporan</div>
+              {/* ── Laporan ── */}
+              <div className="nav-label">Laporan</div>
 
-          <div className="nav-item" onClick={() => navigate("/laporan")}>
-            <span className="nav-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4"  />
-                <line x1="6"  y1="20" x2="6"  y2="14" />
-              </svg>
-            </span>
-            Laporan &amp; Statistik
-          </div>
+              <div className="nav-item" onClick={() => navigate("/laporan")}>
+                <span className="nav-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4"  />
+                    <line x1="6"  y1="20" x2="6"  y2="14" />
+                  </svg>
+                </span>
+                Laporan &amp; Statistik
+              </div>
+            </>
+          )}
 
           <div className="nav-item active">
             <span className="nav-icon">
