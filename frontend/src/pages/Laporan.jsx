@@ -28,6 +28,16 @@ const SALES_COLORS = ["#f59e0b", "#6366f1", "#10b981", "#ef4444", "#8b5cf6", "#3
 
 const FUNNEL_COLORS = ["#3b82f6", "#6366f1", "#f59e0b", "#f97316", "#22c55e"];
 
+/* ── HELPER: ambil role dari localStorage ── */
+function getUserRole() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.role || localStorage.getItem("role") || "Admin";
+  } catch {
+    return "Admin";
+  }
+}
+
 /* ── CUSTOM HOOK: fetch data dari satu endpoint ── */
 function useFetch(endpoint) {
   const [data, setData] = useState(null);
@@ -40,6 +50,7 @@ function useFetch(endpoint) {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "application/json",
+        "Role": getUserRole(),
       },
     })
       .then((res) => {
