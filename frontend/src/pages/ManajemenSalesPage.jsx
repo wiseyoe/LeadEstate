@@ -588,48 +588,69 @@ export default function ManajemenSalesPage() {
    * }
    */
   async function fetchSales() {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      // GET /api/users → ambil semua user, filter roleId=3 (Sales) di frontend
-      // karena backend belum punya GET /api/users/sales
-      const res = await fetch(`${API}/api/users`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+  try {
+    setLoading(true);
 
-      // Filter hanya roleId=3 (Sales), lalu map ke format komponen
-      // User entity field: id, name, email, phone, password, roleId
-      const salesOnly = (Array.isArray(data) ? data : []).filter(u => u.roleId === 3);
+    const token = localStorage.getItem("token");
 
-      const mapped = salesOnly.map((u, i) => ({
-        id:       u.id,
-        name:     u.name  ?? "–",
-        email:    u.email ?? "–",
-        phone:    u.phone ?? "–",
-        role:     u.roleId === 1 ? "Admin" : u.roleId === 2 ? "Supervisor" : "Sales",
-        color:    COLORS[i % COLORS.length],
-        target:   10,
-        closing:  0,
-        followup: 0,
-        online:   false,
-        join:     null,
-        leads:    [],
-        activity: [],
-      }));
+    // ambil user dari localStorage
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-      setSalesTeam(mapped);
-      if (data.length > 0 && !selectedId) {
-        setSelectedId(data[0].id);
-      }
-    } catch (err) {
-      console.error("ERROR fetchSales:", err);
-      // Fallback: keep empty state, no crash
-    } finally {
-      setLoading(false);
+    const res = await fetch(`${API}/api/users`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Role: currentUser.role || "Admin",
+      },
+    });
+
+    console.log("STATUS:", res.status);
+
+    const rawText = await res.text();
+    console.log("RAW RESPONSE:", rawText);
+
+    if (!res.ok) {
+      throw new Error(rawText);
     }
+
+    const data = JSON.parse(rawText);
+
+    const salesOnly = (Array.isArray(data) ? data : []).filter(
+      (u) => u.roleId === 3
+    );
+
+    const mapped = salesOnly.map((u, i) => ({
+      id: u.id,
+      name: u.name ?? "–",
+      email: u.email ?? "–",
+      phone: u.phone ?? "–",
+      role: "Sales",
+      color: COLORS[i % COLORS.length],
+      target: 10,
+      closing: 0,
+      followup: 0,
+      online: false,
+      join: null,
+      leads: [],
+      activity: [],
+    }));
+
+    setSalesTeam(mapped);
+
+    if (mapped.length > 0 && !selectedId) {
+      setSelectedId(mapped[0].id);
+    }
+
+  } catch (err) {
+    console.error("ERROR fetchSales:", err);
+
+    alert(
+      "Gagal mengambil data sales.\n\n" +
+      "Cek console browser untuk detail error."
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   /**
    * POST /sales
