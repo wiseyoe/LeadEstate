@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import apiClient from "../api/api";
 import "../styles/Laporan.css";
+import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
 
 /* ── BASE URL dari .env ── */
@@ -785,10 +787,26 @@ function SummaryTable() {
 export default function LeadEstateLaporan() {
   const navigate = useNavigate();
 
+  // ── currentUser & isAdmin (sama persis dengan Dashboard) ────────────────
+  const [activeNav, setActiveNav] = useState("report");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const isAdmin = currentUser?.role?.toLowerCase() === "admin";
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData) { navigate("/"); return; }
+    try {
+      setCurrentUser(JSON.parse(userData));
+    } catch {
+      navigate("/");
+    }
+  }, [navigate]);
+
   // ── State filter periode ────────────────────────────────────────────────
   const now = new Date();
   const [activePeriod, setActivePeriod]   = useState("bulan");
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1); // 1-12
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear,  setSelectedYear]  = useState(now.getFullYear());
 
   const periods = [
@@ -798,11 +816,6 @@ export default function LeadEstateLaporan() {
     { key: "tahun",   label: "Tahun Ini"  },
   ];
 
-  // Klik tombol periode → update activePeriod
-  // "Tahun Ini" → set ke bulan terakhir tahun ini (Des)
-  // "Kuartal"   → set ke bulan ini
-  // "Bulan Ini" → set ke bulan ini
-  // "Minggu Ini"→ set ke bulan ini
   const handlePeriod = (key) => {
     setActivePeriod(key);
     if (key === "tahun") {
@@ -814,7 +827,6 @@ export default function LeadEstateLaporan() {
     }
   };
 
-  // Dropdown bulan: generate 12 bulan terakhir
   const MONTH_LABELS = ["Januari","Februari","Maret","April","Mei","Juni",
                         "Juli","Agustus","September","Oktober","November","Desember"];
   const monthOptions = [];
@@ -843,43 +855,60 @@ export default function LeadEstateLaporan() {
       `}</style>
 
       <div className="app-wrapper">
-        {/* SIDEBAR */}
-        <aside className="sidebar">
-          <div className="sidebar-brand">
-            <div className="brand-icon">L</div>
-            <div className="brand-name">Lead<span>Estate</span></div>
+
+        {/* ── SIDEBAR (identik dengan Dashboard) ── */}
+        <aside className="le-sidebar">
+          <div className="le-brand">
+            <img src={logo} alt="LeadEstate Logo" className="brand-logo" />
+            <div className="le-brand-name">Lead<span>Estate</span></div>
           </div>
-          <nav className="nav">
-            <div className="nav-label">Menu Utama</div>
-            <div className="nav-item" onClick={() => navigate("/dashboard")}>
-              <IconDashboard />Dashboard
+
+          <nav className="le-nav">
+            <div className="le-nav-label">Menu Utama</div>
+
+            <div className={`le-nav-item${activeNav === "dashboard" ? " active" : ""}`} onClick={() => { setActiveNav("dashboard"); navigate("/dashboard"); }}>
+              <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span>
+              Dashboard
             </div>
-            <div className="nav-item" onClick={() => navigate("/reminder")}>
-              <IconBell />Reminder &amp; Follow Up
-              <span className="nav-badge">5</span>
+
+            <div className={`le-nav-item${activeNav === "reminder" ? " active" : ""}`} onClick={() => { setActiveNav("reminder"); navigate("/reminder"); }}>
+              <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10" /><polygon points="10,8 16,12 10,16" fill="currentColor" /></svg></span>
+              Reminder &amp; Follow-Up
             </div>
-            <div className="nav-item" onClick={() => navigate("/dataLeads")}>
-              <IconPeople />Data Lead
+
+            <div className={`le-nav-item${activeNav === "lead" ? " active" : ""}`} onClick={() => { setActiveNav("lead"); navigate("/dataLeads"); }}>
+              <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg></span>
+              Data Lead
             </div>
-            <div className="nav-item" onClick={() => navigate("/Manajemen_sales")}>
-              <IconPerson />Manajemen Sales
-            </div>
-            <div className="nav-label">Laporan</div>
-            <div className="nav-item active"><IconChart />Laporan &amp; Statistik</div>
-            <div className="nav-item" style={{ marginTop: 8 }} onClick={() => navigate("/settings")}>
-              <IconSettings />Pengaturan
+
+            {/* ── PROTEKSI MENU ADMIN (sama dengan Dashboard) ── */}
+            {isAdmin && (
+              <>
+                <div className={`le-nav-item${activeNav === "sales" ? " active" : ""}`} onClick={() => { setActiveNav("sales"); navigate("/Manajemen_sales"); }}>
+                  <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="20" height="18" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M7 21v-1a5 5 0 0 1 10 0v1" /></svg></span>
+                  Manajemen Sales
+                </div>
+
+                <div className="le-nav-label">Laporan</div>
+
+                <div className={`le-nav-item${activeNav === "report" ? " active" : ""}`} onClick={() => setActiveNav("report")}>
+                  <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg></span>
+                  Laporan &amp; Statistik
+                </div>
+              </>
+            )}
+
+            <div className={`le-nav-item${activeNav === "settings" ? " active" : ""}`} onClick={() => { setActiveNav("settings"); navigate("/settings"); }}>
+              <span className="le-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" /></svg></span>
+              Pengaturan
             </div>
           </nav>
-          <div className="sidebar-footer">
-            <div className="s-avatar">{(() => {
-              try {
-                const u = JSON.parse(localStorage.getItem("user") || "{}");
-                return (u.name || "U").split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
-              } catch { return "U"; }
-            })()}</div>
-            <div className="user-info">
-              <div className="name">{(() => { try { return JSON.parse(localStorage.getItem("user")||"{}").name || "User"; } catch { return "User"; }})()}</div>
-              <div className="role">{(() => { try { const r = JSON.parse(localStorage.getItem("user")||"{}").role; return r==="Admin"?"Administrator":r==="Supervisor"?"Supervisor":r==="Sales"?"Sales":r||"Administrator"; } catch { return "Administrator"; }})()}</div>
+
+          <div className="le-sidebar-footer">
+            <div className="le-avatar">{currentUser?.name?.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase() || "A"}</div>
+            <div>
+              <div className="le-user-name">{currentUser?.name || "User"}</div>
+              <div className="le-user-role">{currentUser?.role || "Sales"}</div>
             </div>
           </div>
         </aside>
@@ -890,7 +919,6 @@ export default function LeadEstateLaporan() {
             <div className="topbar-title">Laporan &amp; Statistik</div>
             <div className="topbar-right">
               <div className="date-chip">📅 {now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
-
             </div>
           </div>
 
@@ -909,7 +937,6 @@ export default function LeadEstateLaporan() {
                 ))}
               </div>
 
-              {/* Dropdown bulan — dinamis, disabled saat "tahun" */}
               <select
                 className="period-select"
                 value={`${selectedMonth}-${selectedYear}`}
@@ -934,7 +961,6 @@ export default function LeadEstateLaporan() {
 
             <KpiGrid />
 
-            {/* BarChart sekarang menerima period, selectedMonth, selectedYear */}
             <div className="row2">
               <BarChart period={activePeriod} selectedMonth={selectedMonth} selectedYear={selectedYear} />
               <DonutChart />
@@ -953,3 +979,4 @@ export default function LeadEstateLaporan() {
     </>
   );
 }
+
