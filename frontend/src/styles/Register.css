@@ -47,14 +47,14 @@
 }
 
 .rg-left {
-  width: 38%;
+  width: 42%;
   flex-shrink: 0;
   background: var(--rg-navy);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 44px 48px;
+  padding: 60px;
 }
 
 /* Animated grid background */
@@ -97,22 +97,23 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  margin-bottom: auto;
   animation: rgFadeUp 0.7s ease both;
 }
 
 .rg-brand-logo {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .rg-brand-text {
   font-family: "Cormorant Garamond", serif;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--rg-white);
-  letter-spacing: 0.2px;
+  letter-spacing: 0.5px;
 }
 
 .rg-brand-text span {
@@ -121,7 +122,7 @@
 
 /* Center block */
 .rg-left-center {
-  flex: 1;
+  margin-bottom: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -970,9 +971,9 @@
 /* ─────────────────────────────────────────────
    RESPONSIVE
    ───────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .rg-left  { display: none; }
-  .rg-right { padding: 28px 20px; }
+  .rg-page { background: var(--rg-off-white); }
 }
 
 /* ─────────────────────────────────────────────

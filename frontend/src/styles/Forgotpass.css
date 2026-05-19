@@ -41,14 +41,14 @@
    LEFT PANEL
    ───────────────────────────────────────────── */
 .fp-left {
-  width: 38%;
+  width: 42%;
   flex-shrink: 0;
   background: var(--fp-navy);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 44px 48px;
+  padding: 60px;
 }
 
 /* Animated grid */
@@ -88,28 +88,30 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  margin-bottom: auto;
   animation: fpFadeUp 0.7s ease both;
 }
 
 .fp-brand-logo {
-  width: 46px;
-  height: 46px;
+  width: 40px; 
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .fp-brand-text {
   font-family: "Cormorant Garamond", serif;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--fp-white);
+  letter-spacing: 0.5px;
 }
 
 .fp-brand-text span { color: var(--fp-gold); }
 
 /* Center */
 .fp-left-center {
-  flex: 1;
+  margin-bottom: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -765,9 +767,9 @@
 /* ─────────────────────────────────────────────
    RESPONSIVE
    ───────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .fp-left  { display: none; }
-  .fp-right { padding: 32px 20px; }
+  .fp-page { background: var(--fp-off-white); }
 }
 
 /* ─────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import "../styles/Forgotpass.css";
 import { useNavigate } from "react-router-dom";
+import LogoPng from "../assets/leadestate-logo.png"; 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ function LeftPanel({ currentPanel }) {
     <div className="fp-left">
       {/* Brand */}
       <div className="fp-left-brand">
-        <img src="/logo.png" alt="LeadEstate" className="fp-brand-logo" />
+        <img src={LogoPng} alt="LeadEstate Logo" className="fp-brand-logo" />
         <div className="fp-brand-text">Lead<span>Estate</span></div>
       </div>
 
