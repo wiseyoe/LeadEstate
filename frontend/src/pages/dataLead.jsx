@@ -287,17 +287,23 @@ export default function DataLead() {
   async function fetchLeads() {
     try {
       setLoading(true);
+
       const userId = localStorage.getItem("userId");
-      const token  = localStorage.getItem("token");
-      const url    = userId
+      const token = localStorage.getItem("token");
+
+      const url = userId
         ? `${API}/api/leads?userId=${userId}`
         : `${API}/api/leads/raw`;
+
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const data = await res.json();
-      setLeads(Array.isArray(data) ? data : []);
+
+      setLeads(Array.isArray(data) ? data.sort((a, b) => b.id - a.id) : []);
     } catch (err) {
       console.error("ERROR fetchLeads:", err);
     } finally {
