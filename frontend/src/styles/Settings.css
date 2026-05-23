@@ -209,6 +209,23 @@ body {
   justify-content: center;
 }
 
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-badge.admin {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.role-badge.sales {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
 /* Footer */
 .sidebar-footer {
   padding: 14px 16px;

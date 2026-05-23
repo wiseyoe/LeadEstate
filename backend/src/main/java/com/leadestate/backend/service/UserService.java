@@ -76,4 +76,20 @@ public User updateProfile(Integer id, User request) {
 
     return userRepository.save(user);
 }
+public User updateUserRole(Integer id, Integer roleId) {
+
+    User user = userRepository.findById(id)
+        .orElseThrow(() ->
+            new RuntimeException(
+                "User tidak ditemukan"
+            ));
+
+    if (roleId == 1) {
+        user.setRoleId(1);
+    } else {
+        user.setRoleId(3);
+    }
+
+    return userRepository.save(user);
+}
 }

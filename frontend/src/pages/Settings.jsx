@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/Settings.css";
 import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
+import { updateProfile, getAllUsers, deleteUser, updateUserRole } from "../api/api";
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
 const NOTIF_DATA = [
-  { cat: "Follow Up Jatuh Tempo", sub: "Pengingat jadwal follow up",       app: true,  email: true,  wa: true  },
+  { cat: "Follow Up Jatuh Tempo", sub: "Pengingat jadwal follow up",      app: true,  email: true,  wa: true  },
   { cat: "Lead Baru Masuk",       sub: "Saat ada lead baru ditambahkan",   app: true,  email: false, wa: false },
   { cat: "Status Lead Berubah",   sub: "Update status oleh tim sales",     app: true,  email: true,  wa: false },
   { cat: "Closing Berhasil",      sub: "Notifikasi deal selesai",          app: true,  email: true,  wa: true  },
@@ -16,31 +17,41 @@ const NOTIF_DATA = [
 
 const INTEGRATIONS = [
   { logo: "💬", name: "WhatsApp Business API", desc: "Kirim pesan WA otomatis ke lead",    connected: true  },
-  { logo: "📊", name: "Google Sheets",         desc: "Sync data lead ke spreadsheet",      connected: true  },
-];
-
-// TEAM data - "isMe" item akan di-override dengan data user login
-const TEAM_STATIC = [
-  { name: "Budi Wicaksono", role: "Senior Sales",  email: "budi@leadestate.id",  color: "#6366f1", status: "online",  isMe: false },
-  { name: "Sari Rahayu",    role: "Senior Sales",  email: "sari@leadestate.id",  color: "#10b981", status: "offline", isMe: false },
-  { name: "Dian Hartono",   role: "Sales Agent",   email: "dian@leadestate.id",  color: "#ef4444", status: "offline", isMe: false },
-  { name: "Fajar Kusuma",   role: "Junior Sales",  email: "fajar@leadestate.id", color: "#8b5cf6", status: "offline", isMe: false },
+  { logo: "📊", name: "Google Sheets",          desc: "Sync data lead ke spreadsheet",    connected: true  },
 ];
 
 // ── USER HELPER (module level agar bisa diakses semua komponen) ──────────────
 function getCurrentUser() {
   try { return JSON.parse(localStorage.getItem("user") || "{}"); } catch { return {}; }
 }
+
+function isAdminUser() {
+  const role = getCurrentUser()?.role;
+
+  return (
+    role === 1 ||
+    role === "1" ||
+    role?.toString().toLowerCase() === "admin"
+  );
+}
+
 function getUserInitials() {
   const name = getCurrentUser().name || "U";
   return name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
 }
+
 function getUserRole() {
-  const role = getCurrentUser().role;
-  return role === "Admin" ? "Administrator"
-    : role === "Supervisor" ? "Supervisor"
-    : role === "Sales" ? "Sales"
-    : role || "Administrator";
+  const role = getCurrentUser()?.role;
+
+  if (
+    role === 1 ||
+    role === "1" ||
+    role?.toString().toLowerCase() === "admin"
+  ) {
+    return "Administrator";
+  }
+
+  return "Sales";
 }
 
 const DANGER_ITEMS = [
@@ -65,19 +76,6 @@ const DANGER_ITEMS = [
   },
 ];
 
-const NAV_ITEMS = [
-  { id: "profil",     icon: "👤", label: "Profil Saya",     group: "Akun"    },
-  { id: "keamanan",   icon: "🔒", label: "Keamanan",        group: "Akun"    },
-  { id: "notifikasi", icon: "🔔", label: "Notifikasi",      group: "Sistem"  },
-  { id: "integrasi",  icon: "🔗", label: "Integrasi",       group: "Sistem"  },
-
-  ...(getCurrentUser()?.role?.toLowerCase() === "admin"
-    ? [{ id: "tim", icon: "👥", label: "Manajemen Tim", group: "Tim" }]
-    : []),
-
-  { id: "bahaya",     icon: "⚠️", label: "Zona Bahaya",     group: "Lainnya" },
-];
-
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
 function initials(name) {
@@ -98,12 +96,14 @@ function Toggle({ on, onChange }) {
   );
 }
 
-function SecBtn({ children, danger, solid, onClick }) {
+// Menambahkan properti 'disabled' opsional agar tombol simpan/batal di main view sinkron
+function SecBtn({ children, danger, solid, onClick, disabled }) {
   return (
     <button
       type="button"
       className={`sec-btn${danger ? " danger" : ""}${solid ? " solid" : ""}`}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>
@@ -127,118 +127,107 @@ function CardHead({ icon, iconBg, title, desc, action }) {
 
 // ─── SECTIONS ────────────────────────────────────────────────────────────────
 
-// 1. PROFIL SAYA
-function SectionProfil({ onDirty, showToast }) {
+// 1. PROFIL SAYA (Sudah Diperbarui Berdasarkan Instruksi)
+function SectionProfil({ onDirty, form, setForm }) {
+  const user = getCurrentUser();
+
+  const handleChange = (field, value) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    onDirty();
+  };
+
+  const formatPhone = (value) => {
+    // hapus semua selain angka
+    let digits = value.replace(/\D/g, "");
+
+    // batasi max 12 digit
+    digits = digits.substring(0, 12);
+
+    // format xxxx-xxxx-xxxx
+    const parts = digits.match(/.{1,4}/g);
+    return parts ? parts.join("-") : "";
+  };
+
   return (
     <>
       <div className="set-card">
+
         {/* Avatar */}
         <div className="avatar-section">
           <div className="big-av">
             {getUserInitials()}
-            <div className="av-edit">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-              </svg>
-            </div>
           </div>
           <div className="av-info">
-            <div className="av-name">{getCurrentUser().name || "User"}</div>
-            <div className="av-role">{getUserRole()} · {getCurrentUser().email || ""}</div>
-            <div className="av-actions">
-              <button className="av-btn primary" onClick={() => showToast("Foto profil diperbarui")}>
-                Ganti Foto
-              </button>
-              <button className="av-btn ghost" onClick={() => showToast("Foto dihapus")}>
-                Hapus Foto
-              </button>
-            </div>
+            <div className="av-name">{user.name || "User"}</div>
+            <div className="av-role">{getUserRole()} · {user.email || ""}</div>
           </div>
         </div>
 
         {/* Form */}
         <div className="set-card-body">
+
           <div className="form-grid mb-16">
             <div className="fg">
               <label className="flbl">Nama Depan</label>
-              <input className="finp" defaultValue="Admin" onChange={onDirty} />
+              <input
+                className="finp"
+                value={form.firstName}
+                onChange={(e) => handleChange("firstName", e.target.value)}
+              />
             </div>
+
             <div className="fg">
               <label className="flbl">Nama Belakang</label>
-              <input className="finp" defaultValue="Rafi" onChange={onDirty} />
+              <input
+                className="finp"
+                value={form.lastName}
+                onChange={(e) => handleChange("lastName", e.target.value)}
+              />
             </div>
           </div>
 
           <div className="form-grid mb-16">
             <div className="fg">
               <label className="flbl">Email</label>
-              <input className="finp" type="email" defaultValue="admin@leadestate.id" onChange={onDirty} />
+              <input
+                className="finp"
+                type="email"
+                value={form.email}
+                disabled
+              />
             </div>
+
             <div className="fg">
               <label className="flbl">Nomor HP</label>
-              <input className="finp" defaultValue="0812-3456-7890" onChange={onDirty} />
+              <input
+                className="finp"
+                value={form.phone}
+                disabled
+              />
             </div>
           </div>
 
           <div className="form-grid mb-16">
             <div className="fg">
               <label className="flbl">Jabatan</label>
-              <input className="finp" defaultValue="Administrator" onChange={onDirty} />
-            </div>
-            <div className="fg">
-              <label className="flbl">Perusahaan</label>
-              <input className="finp" defaultValue="LeadEstate Corp" onChange={onDirty} />
-            </div>
-          </div>
-
-          <div className="form-grid full">
-            <div className="fg">
-              <label className="flbl">Bio Singkat</label>
-              <textarea
+              <input
                 className="finp"
-                rows={3}
-                defaultValue="Pengelola sistem CRM properti untuk tim sales LeadEstate."
-                onChange={onDirty}
+                value={getUserRole()}
+                disabled
               />
             </div>
           </div>
+
         </div>
       </div>
     </>
   );
 }
 
-// 2. KEAMANAN
-function SectionKeamanan({ onDirty }) {
-  return (
-    <div className="set-card">
-      <CardHead
-        icon="🔑"
-        iconBg="#fef3cd"
-        title="Password"
-        desc="Terakhir diubah 30 hari lalu"
-      />
-      <div className="set-card-body">
-        <div className="form-grid full gap-14">
-          <div className="fg">
-            <label className="flbl">Password Saat Ini</label>
-            <input className="finp" type="password" placeholder="Masukkan password lama" onChange={onDirty} />
-          </div>
-          <div className="fg">
-            <label className="flbl">Password Baru</label>
-            <input className="finp" type="password" placeholder="Min. 8 karakter" onChange={onDirty} />
-          </div>
-          <div className="fg">
-            <label className="flbl">Konfirmasi Password Baru</label>
-            <input className="finp" type="password" placeholder="Ulangi password baru" onChange={onDirty} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 3. NOTIFIKASI
+// 2. NOTIFIKASI
 function SectionNotifikasi({ onDirty }) {
   const [states, setStates] = useState(
     NOTIF_DATA.map((n) => ({ app: n.app, email: n.email, wa: n.wa }))
@@ -289,7 +278,7 @@ function SectionNotifikasi({ onDirty }) {
   );
 }
 
-// 4. INTEGRASI
+// 3. INTEGRASI
 function SectionIntegrasi({ showToast }) {
   const [integs, setIntegs] = useState(INTEGRATIONS);
 
@@ -329,24 +318,147 @@ function SectionIntegrasi({ showToast }) {
   );
 }
 
-// 5. MANAJEMEN TIM
+// 4. MANAJEMEN TIM
 function SectionTim({ showToast }) {
+  const [team, setTeam] = useState([]);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await getAllUsers();
+
+      const mapped = data.map((u, i) => {
+      
+        console.log("USER DATA:", u);
+      
+        const normalizedRole =
+          u.roleId === 1 || u.admin === true
+            ? "Admin"
+            : "Sales";
+
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: normalizedRole, // 🔥 FIX DISINI
+          color: ["#6366f1", "#10b981", "#ef4444", "#8b5cf6"][i % 4],
+          status: "offline",
+          isMe: u.id === getCurrentUser().id,
+        };
+      });
+
+      setTeam(mapped);
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Gagal ambil data tim");
+    }
+  };
+
+  const handleDelete = async (member) => {
+    if (!window.confirm(`Hapus ${member.name}?`)) return;
+
+    try {
+      await deleteUser(member.id);
+      showToast(`✅ ${member.name} dihapus`);
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Gagal hapus user");
+    }
+  };
+
+  const updateRole = async (id, newRole) => {
+    try {
+
+      const roleId =
+        newRole === "Admin"
+          ? 1
+          : 3;
+
+      await updateUserRole(
+        id,
+        roleId
+      );
+
+      showToast(
+        "✅ Role berhasil diupdate"
+      );
+
+      fetchUsers();
+
+    } catch (err) {
+
+      console.error(err);
+
+      showToast(
+        "❌ Gagal update role"
+      );
+    }
+  };
+
+  // 🔍 FILTER + SEARCH
+  const filteredTeam = team.filter((m) => {
+
+    const matchSearch =
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.email.toLowerCase().includes(search.toLowerCase());
+
+    let matchRole = true;
+
+    if (roleFilter === "admin") {
+      matchRole = m.role === "Admin";
+    } else if (roleFilter === "sales") {
+      matchRole = m.role === "Sales";
+    }
+
+    return matchSearch && matchRole;
+  });
+
   return (
     <div className="set-card">
+
       <CardHead
         icon="👥"
         iconBg="#dbeafe"
         title="Anggota Tim"
-        desc="5 anggota aktif"
+        desc={`${filteredTeam.length} anggota`}
         action={
-          <SecBtn onClick={() => showToast("Form undang anggota baru dibuka")}>
-            + Undang Anggota
-          </SecBtn>
+          <div style={{ display: "flex", gap: "8px" }}>
+
+            {/* 🔍 SEARCH */}
+            <input
+              type="text"
+              placeholder="Cari nama / email..."
+              className="finp"
+              style={{ width: "200px" }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            {/* 🎯 FILTER ROLE */}
+            <select
+              className="finp"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+            >
+              <option value="all">Semua</option>
+              <option value="admin">Admin</option>
+              <option value="sales">Sales</option>
+            </select>
+
+          </div>
         }
       />
+
       <div>
-        {[{ name: getCurrentUser().name||'User', role: getUserRole(), email: getCurrentUser().email||'', color:'#f59e0b', status:'online', isMe:true }, ...TEAM_STATIC].map((member) => (
-          <div key={member.email} className="sec-row">
+        {filteredTeam.map((member) => (
+          <div key={member.id} className="sec-row">
+
             <div className="team-avatar" style={{ background: member.color }}>
               {initials(member.name)}
               <div
@@ -360,8 +472,17 @@ function SectionTim({ showToast }) {
                 {member.name}
                 {member.isMe && <span className="me-badge">Saya</span>}
               </div>
+
               <div className="sec-desc">
-                {member.role} · {member.email}
+                <span
+                  className={`role-badge ${
+                    member.role.toLowerCase() === "admin" ? "admin" : "sales"
+                  }`}
+                >
+                  {member.role}
+                </span>
+                {" · "}
+                {member.email}
               </div>
             </div>
 
@@ -369,10 +490,18 @@ function SectionTim({ showToast }) {
 
             {!member.isMe && (
               <>
-                <SecBtn onClick={() => showToast(`Edit akses ${member.name}`)}>
-                  Edit Akses
-                </SecBtn>
-                <SecBtn danger onClick={() => showToast(`${member.name} dihapus dari tim`)}>
+                {/* DROPDOWN ROLE */}
+                <select
+                  className="finp"
+                  value={member.role}
+                  onChange={(e) => updateRole(member.id, e.target.value)}
+                  style={{ width: "120px" }}
+                >
+                  <option value="Admin">Admin</option>
+                  <option value="Sales">Sales</option>
+                </select>
+
+                <SecBtn danger onClick={() => handleDelete(member)}>
                   Hapus
                 </SecBtn>
               </>
@@ -384,7 +513,7 @@ function SectionTim({ showToast }) {
   );
 }
 
-// 6. ZONA BAHAYA
+// 5. ZONA BAHAYA
 function SectionBahaya({ showToast }) {
   const confirm = (action) => {
     if (window.confirm(`Apakah Anda yakin ingin melakukan: "${action}"?\n\nTindakan ini tidak bisa dibatalkan.`)) {
@@ -423,17 +552,17 @@ function SectionBahaya({ showToast }) {
             <div className="di-title">Logout dari Akun</div>
             <div className="di-desc">Keluar dari sesi saat ini dan kembali ke halaman login.</div>
           </div>
-            <button
-                type="button"
-                className="logout-btn"
-                onClick={() => {
-                    localStorage.removeItem("isLogin"); // hapus status login
-                    localStorage.removeItem("user");    // hapus data user
-                    window.location.href = "/";         // redirect ke login
-                }}
-                >
-                🚪 Logout
-            </button>
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={() => {
+              localStorage.removeItem("isLogin"); // hapus status login
+              localStorage.removeItem("user");    // hapus data user
+              window.location.href = "/";         // redirect ke login
+            }}
+          >
+            🚪 Logout
+          </button>
         </div>
       </div>
     </div>
@@ -449,12 +578,30 @@ export default function Settings() {
   const toastTimer                    = { current: null };
   const navigate = useNavigate();
 
-  // User dari localStorage - pakai helper functions yang sudah di module level
-  const currentUser  = getCurrentUser();
-  const isAdmin =
-    currentUser?.role?.toLowerCase() === "admin";
+  // Inisialisasi state form profil di level parent (Settings) agar datanya persistent saat ganti tab & bisa di-reset/simpan
+  const user = getCurrentUser();
+  const [form, setForm] = useState({
+    firstName: user.name?.split(" ")[0] || "",
+    lastName: user.name?.split(" ").slice(1).join(" ") || "",
+    email: user.email || "",
+    phone: user.phone || ""
+  });
+
+  const isAdmin = isAdminUser();
   const userInitials = getUserInitials();
   const userRole     = getUserRole();
+
+  const NAV_ITEMS = [
+    { id: "profil",     icon: "👤", label: "Profil Saya",     group: "Akun"    },
+    { id: "notifikasi", icon: "🔔", label: "Notifikasi",      group: "Sistem"  },
+    { id: "integrasi",  icon: "🔗", label: "Integrasi",       group: "Sistem"  },
+
+    ...(isAdminUser()
+      ? [{ id: "tim", icon: "👥", label: "Manajemen Tim", group: "Tim" }]
+      : []),
+
+    { id: "bahaya",     icon: "⚠️", label: "Zona Bahaya",     group: "Lainnya" },
+  ];
 
   const showToast = (msg) => {
     clearTimeout(toastTimer.current);
@@ -463,16 +610,57 @@ export default function Settings() {
   };
 
   const markDirty    = () => setIsDirty(true);
-  const saveChanges  = () => { setIsDirty(false); showToast("✓ Semua perubahan disimpan!"); };
-  const discardChanges = () => setIsDirty(false);
+  
+  // Fungsi Simpan Perubahan
+  const saveChanges = async () => { 
+    try {
+      // data yang dikirim ke backend
+      const payload = {
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email,
+        phone: form.phone
+      };
+
+      // CALL API 🔥
+      const updatedUser = await updateProfile(user.id, payload);
+
+      // update localStorage dari response backend (lebih aman)
+      const oldUser = getCurrentUser();
+
+      const mergedUser = {
+        ...oldUser,
+        ...updatedUser
+      };
+
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+
+      setIsDirty(false);
+      showToast("✓ Profil berhasil diperbarui!");
+
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Gagal update profil");
+    }
+  };
+
+  // Fungsi Batal Perubahan (Reset Form ke data semula)
+  const discardChanges = () => { 
+    setIsDirty(false); 
+    const freshUser = getCurrentUser();
+    setForm({
+      firstName: freshUser.name?.split(" ")[0] || "",
+      lastName: freshUser.name?.split(" ").slice(1).join(" ") || "",
+      email: freshUser.email || "",
+      phone: freshUser.phone || ""
+    });
+  };
 
   // Group nav items for rendering section labels
   const groups = [...new Set(NAV_ITEMS.map((n) => n.group))];
 
   const renderSection = () => {
     switch (activeTab) {
-      case "profil":     return <SectionProfil     onDirty={markDirty} showToast={showToast} />;
-      case "keamanan":   return <SectionKeamanan   onDirty={markDirty} />;
+      case "profil":     return <SectionProfil onDirty={markDirty} form={form} setForm={setForm} />;
       case "notifikasi": return <SectionNotifikasi onDirty={markDirty} />;
       case "integrasi":  return <SectionIntegrasi  showToast={showToast} />;
       case "tim":        return <SectionTim        showToast={showToast} />;
@@ -501,17 +689,17 @@ export default function Settings() {
           <div
             className="nav-item"
             onClick={() => navigate("/dashboard")}
-            >
+          >
             <span className="nav-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="7" height="7" rx="1.5" />
                 <rect x="14" y="3" width="7" height="7" rx="1.5" />
                 <rect x="3" y="14" width="7" height="7" rx="1.5" />
                 <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                </svg>
+              </svg>
             </span>
             Dashboard
-            </div>
+          </div>
 
           <div className="nav-item" onClick={() => navigate("/reminder")}>
             <span className="nav-icon">
@@ -583,8 +771,8 @@ export default function Settings() {
         <div className="sidebar-footer">
           <div className="s-av">{userInitials}</div>
           <div className="user-info">
-            <div className="name">{getCurrentUser().name || "User"}</div>
-            <div className="role">{getUserRole()}</div>
+            <div className="name">{form.firstName ? `${form.firstName} ${form.lastName}` : (user.name || "User")}</div>
+            <div className="role">{userRole}</div>
           </div>
         </div>
 

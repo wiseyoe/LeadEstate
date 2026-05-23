@@ -48,7 +48,7 @@ const handleLogin = async (e) => {
     // TAMBAHKAN BARIS INI:
     console.log("ROLE:", res.data.role);
 console.log("CEK DATA DARI SERVER:", res.data); 
-alert("Isi data server: " + JSON.stringify(res.data)); // Ini akan muncul kotak pesan di layar
+// alert("Isi data server: " + JSON.stringify(res.data)); // Ini akan muncul kotak pesan di layar
 
 localStorage.setItem("user", JSON.stringify(res.data));
 setUser(res.data);

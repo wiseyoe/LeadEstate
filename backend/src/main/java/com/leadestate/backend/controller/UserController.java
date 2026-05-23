@@ -72,6 +72,32 @@ public class UserController {
     }
 
     // =========================
+    // UPDATE ROLE ONLY
+    // =========================
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> updateRole(
+            @RequestHeader("Role") String role,
+            @PathVariable Integer id,
+            @RequestBody User user
+    ) {
+        try {
+
+            authService.checkAdmin(role);
+
+            User updatedUser =
+                userService.updateUserRole(
+                    id,
+                    user.getRoleId()
+                );
+
+            return ResponseEntity.ok(updatedUser);
+
+        } catch (RuntimeException e) {
+            return handleUserException(e);
+        }
+    }
+
+    // =========================
     // DELETE USER (FR11) (Admin Only)
     // =========================
     @DeleteMapping("/{id}")

@@ -204,6 +204,8 @@ function Panel1({ onNext, navigate }) {
 
         setLoading(false);
 
+        alert(`Kode OTP kamu: ${data.token}`);
+
         onNext(em, data.token);
       })
       .catch((err) => {
