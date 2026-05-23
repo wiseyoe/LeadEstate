@@ -3,21 +3,50 @@ import "../styles/Settings.css";
 import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
 import { updateProfile, getAllUsers, deleteUser, updateUserRole } from "../api/api";
+import { getNotifSettings, saveNotifSettings } from "../api/api";
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
 const NOTIF_DATA = [
-  { cat: "Follow Up Jatuh Tempo", sub: "Pengingat jadwal follow up",      app: true,  email: true,  wa: true  },
-  { cat: "Lead Baru Masuk",       sub: "Saat ada lead baru ditambahkan",   app: true,  email: false, wa: false },
-  { cat: "Status Lead Berubah",   sub: "Update status oleh tim sales",     app: true,  email: true,  wa: false },
-  { cat: "Closing Berhasil",      sub: "Notifikasi deal selesai",          app: true,  email: true,  wa: true  },
-  { cat: "Laporan Mingguan",      sub: "Ringkasan performa setiap Senin",  app: false, email: true,  wa: false },
-  { cat: "Pengumuman Sistem",     sub: "Update fitur & maintenance",       app: true,  email: true,  wa: false },
+  {
+    cat: "Follow Up Jatuh Tempo",
+    sub: "Pengingat jadwal follow up",
+    app: true,
+    wa: true
+  },
+  {
+    cat: "Lead Baru Masuk",
+    sub: "Saat ada lead baru ditambahkan",
+    app: true,
+    wa: false
+  },
+  {
+    cat: "Status Lead Berubah",
+    sub: "Update status oleh tim sales",
+    app: true,
+    wa: false
+  },
+  {
+    cat: "Closing Berhasil",
+    sub: "Notifikasi deal selesai",
+    app: true,
+    wa: true
+  },
+  {
+    cat: "Pengumuman Sistem",
+    sub: "Update fitur & maintenance",
+    app: true,
+    wa: false
+  }
 ];
 
 const INTEGRATIONS = [
-  { logo: "💬", name: "WhatsApp Business API", desc: "Kirim pesan WA otomatis ke lead",    connected: true  },
-  { logo: "📊", name: "Google Sheets",          desc: "Sync data lead ke spreadsheet",    connected: true  },
+  {
+    logo: "💬",
+    name: "WhatsApp Business API",
+    desc: "Kirim pesan follow up otomatis ke lead",
+    connected: true
+  }
 ];
 
 // ── USER HELPER (module level agar bisa diakses semua komponen) ──────────────
@@ -229,49 +258,286 @@ function SectionProfil({ onDirty, form, setForm }) {
 
 // 2. NOTIFIKASI
 function SectionNotifikasi({ onDirty }) {
-  const [states, setStates] = useState(
-    NOTIF_DATA.map((n) => ({ app: n.app, email: n.email, wa: n.wa }))
-  );
+  const user = getCurrentUser();
+  const [states, setStates] = useState({
+    followupApp: true,
+    followupWa: true,
 
-  const toggle = (i, key) => {
-    setStates((prev) => {
-      const next = [...prev];
-      next[i] = { ...next[i], [key]: !next[i][key] };
-      return next;
-    });
+    leadApp: true,
+    leadWa: false,
+
+    statusApp: true,
+    statusWa: false,
+
+    closingApp: true,
+    closingWa: true,
+
+    systemApp: true,
+    systemWa: false
+  });
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const data =
+        await getNotifSettings(
+          user.id
+        );
+
+      if (data) {
+        setStates({
+          followupApp:
+            data.followupApp ?? true,
+          followupWa:
+            data.followupWa ?? true,
+          leadApp:
+            data.leadApp ?? true,
+          leadWa:
+            data.leadWa ?? false,
+          statusApp:
+            data.statusApp ?? true,
+          statusWa:
+            data.statusWa ?? false,
+          closingApp:
+            data.closingApp ?? true,
+          closingWa:
+            data.closingWa ?? true,
+          systemApp:
+            data.systemApp ?? true,
+          systemWa:
+            data.systemWa ?? false
+        });
+      }
+    } catch (err) {
+      console.error(
+        "Notif load error",
+        err
+      );
+    }
+  };
+
+  const toggle = async (key) => {
+    const updated = {
+      ...states,
+      [key]:
+        !states[key]
+    };
+
+    setStates(updated);
     onDirty();
+
+    try {
+      await saveNotifSettings(
+        user.id,
+        updated
+      );
+    } catch (err) {
+      console.error(
+        "Notif save error",
+        err
+      );
+    }
   };
 
   return (
     <div className="set-card">
-      <CardHead icon="🔔" iconBg="#fef3cd" title="Preferensi Notifikasi" desc="Atur kapan dan bagaimana kamu diberitahu" />
+      <CardHead
+        icon="🔔"
+        iconBg="#fef3cd"
+        title="Preferensi Notifikasi"
+        desc="Atur kapan dan bagaimana kamu diberitahu"
+      />
       <table className="notif-table">
         <thead>
           <tr>
             <th>Jenis Notifikasi</th>
-            <th className="text-center">In-App</th>
-            <th className="text-center">Email</th>
-            <th className="text-center">WhatsApp</th>
+            <th className="text-center">
+              In-App
+            </th>
+            <th className="text-center">
+              WhatsApp
+            </th>
           </tr>
         </thead>
         <tbody>
-          {NOTIF_DATA.map((n, i) => (
-            <tr key={n.cat}>
-              <td>
-                <div className="notif-category">{n.cat}</div>
-                <div className="notif-sub">{n.sub}</div>
-              </td>
-              <td className="text-center">
-                <Toggle on={states[i].app}   onChange={() => toggle(i, "app")}   />
-              </td>
-              <td className="text-center">
-                <Toggle on={states[i].email} onChange={() => toggle(i, "email")} />
-              </td>
-              <td className="text-center">
-                <Toggle on={states[i].wa}    onChange={() => toggle(i, "wa")}    />
-              </td>
-            </tr>
-          ))}
+
+          {/* FOLLOWUP */}
+          <tr>
+            <td>
+              <div className="notif-category">
+                Follow Up Jatuh Tempo
+              </div>
+
+              <div className="notif-sub">
+                Pengingat jadwal follow up
+              </div>
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.followupApp}
+                onChange={() =>
+                  toggle(
+                    "followupApp"
+                  )
+                }
+              />
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.followupWa}
+                onChange={() =>
+                  toggle(
+                    "followupWa"
+                  )
+                }
+              />
+            </td>
+          </tr>
+
+          {/* LEAD */}
+          <tr>
+            <td>
+              <div className="notif-category">
+                Lead Baru Masuk
+              </div>
+
+              <div className="notif-sub">
+                Saat ada lead baru ditambahkan
+              </div>
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.leadApp}
+                onChange={() =>
+                  toggle(
+                    "leadApp"
+                  )
+                }
+              />
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.leadWa}
+                onChange={() =>
+                  toggle(
+                    "leadWa"
+                  )
+                }
+              />
+            </td>
+          </tr>
+
+          {/* STATUS */}
+          <tr>
+            <td>
+              <div className="notif-category">
+                Status Lead Berubah
+              </div>
+
+              <div className="notif-sub">
+                Update status oleh tim sales
+              </div>
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.statusApp}
+                onChange={() =>
+                  toggle(
+                    "statusApp"
+                  )
+                }
+              />
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.statusWa}
+                onChange={() =>
+                  toggle(
+                    "statusWa"
+                  )
+                }
+              />
+            </td>
+          </tr>
+
+          {/* CLOSING */}
+          <tr>
+            <td>
+              <div className="notif-category">
+                Closing Berhasil
+              </div>
+
+              <div className="notif-sub">
+                Notifikasi deal selesai
+              </div>
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.closingApp}
+                onChange={() =>
+                  toggle(
+                    "closingApp"
+                  )
+                }
+              />
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.closingWa}
+                onChange={() =>
+                  toggle(
+                    "closingWa"
+                  )
+                }
+              />
+            </td>
+          </tr>
+
+          {/* SYSTEM */}
+          <tr>
+            <td>
+              <div className="notif-category">
+                Pengumuman Sistem
+              </div>
+
+              <div className="notif-sub">
+                Update fitur & maintenance
+              </div>
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.systemApp}
+                onChange={() =>
+                  toggle(
+                    "systemApp"
+                  )
+                }
+              />
+            </td>
+
+            <td className="text-center">
+              <Toggle
+                on={states.systemWa}
+                onChange={() =>
+                  toggle(
+                    "systemWa"
+                  )
+                }
+              />
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

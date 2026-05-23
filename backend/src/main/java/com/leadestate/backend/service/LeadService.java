@@ -5,6 +5,8 @@ import com.leadestate.backend.dto.ReportResponse;
 import com.leadestate.backend.entity.Lead;
 import com.leadestate.backend.entity.LeadStatus;
 import com.leadestate.backend.entity.User;
+import com.leadestate.backend.entity.NotificationSetting;
+import com.leadestate.backend.repository.NotificationSettingRepository;
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.LeadStatusRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
@@ -26,6 +28,9 @@ public class LeadService {
     @Autowired
     private LeadStatusRepository leadStatusRepository;
 
+    @Autowired
+    private NotificationSettingRepository notificationSettingRepository;
+
     public List<Lead> getLeadsByUser(User user) {
         if (user.isAdmin()) {
             return leadRepository.findAll();
@@ -39,19 +44,88 @@ public class LeadService {
     // =========================
     public Lead createLead(LeadRequest request) {
         Lead lead = new Lead();
-        lead.setName(request.getName());
-        lead.setPhone(request.getPhone());
-        lead.setEmail(request.getEmail());
-        lead.setPropertyId(request.getPropertyId());
-        lead.setSalesId(request.getSalesId());
 
-        LeadStatus status = leadStatusRepository.findById(request.getStatusId())
-            .orElseThrow(() -> new RuntimeException("Status tidak ditemukan"));
+        lead.setName(
+            request.getName()
+        );
+
+        lead.setPhone(
+            request.getPhone()
+        );
+
+        lead.setEmail(
+            request.getEmail()
+        );
+
+        lead.setPropertyId(
+            request.getPropertyId()
+        );
+
+        lead.setSalesId(
+            request.getSalesId()
+        );
+
+        LeadStatus status =
+            leadStatusRepository
+            .findById(
+                request.getStatusId()
+            )
+            .orElseThrow(
+                () -> new RuntimeException(
+                    "Status tidak ditemukan"
+                )
+            );
+
         lead.setStatus(status);
 
-        lead.setSource(request.getSource());
+        lead.setSource(
+            request.getSource()
+        );
 
-        return leadRepository.save(lead);
+        Lead savedLead =
+            leadRepository.save(
+                lead
+            );
+
+        // NOTIF LEAD BARU
+        NotificationSetting setting =
+            notificationSettingRepository
+            .findByUserId(
+                request.getSalesId()
+            )
+            .orElse(null);
+
+        if(
+            setting != null
+            &&
+            Boolean.TRUE.equals(
+                setting.getLeadApp()
+            )
+        ){
+
+            System.out.println(
+                "NOTIF APP -> Lead baru masuk untuk sales "
+                +
+                request.getSalesId()
+            );
+
+        }
+
+        if(
+            setting != null
+            &&
+            Boolean.TRUE.equals(
+                setting.getLeadWa()
+            )
+        ){
+
+            System.out.println(
+                "NOTIF WA -> Lead baru masuk"
+            );
+
+        }
+
+        return savedLead;
     }
 
     // =========================

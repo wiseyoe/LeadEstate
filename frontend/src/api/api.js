@@ -56,4 +56,25 @@ export const updateUserRole = async (
   return response.data;
 };
 
+export const getNotifSettings = async (userId) => {
+  const res = await apiClient.get(
+    `/notif-settings/${userId}`
+  );
+
+  return res.data;
+};
+
+export const saveNotifSettings = async (
+  userId,
+  data
+) => {
+
+  const res = await apiClient.put(
+    `/notif-settings/${userId}`,
+    data
+  );
+
+  return res.data;
+};
+
 export default apiClient;
