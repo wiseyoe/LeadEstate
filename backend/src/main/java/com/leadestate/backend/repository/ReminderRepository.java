@@ -25,4 +25,18 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
         ORDER BY fu.followup_date ASC
     """, nativeQuery = true)
     List<Object[]> getTodayReminders();
+
+    @Query(value = """
+        SELECT
+            r.id,
+            l.sales_id,
+            l.name
+        FROM reminders r
+        JOIN follow_ups fu
+            ON r.followup_id = fu.id
+        JOIN leads l
+            ON fu.lead_id = l.id
+        WHERE r.status = 'pending'
+    """, nativeQuery = true)
+    List<Object[]> getPendingReminderNotifications();
 }

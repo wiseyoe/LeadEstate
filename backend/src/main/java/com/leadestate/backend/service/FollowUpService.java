@@ -3,7 +3,9 @@ package com.leadestate.backend.service;
 import com.leadestate.backend.dto.FollowUpRequest;
 import com.leadestate.backend.entity.FollowUp;
 import com.leadestate.backend.entity.NotificationSetting;
+import com.leadestate.backend.entity.Lead;
 
+import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
 import com.leadestate.backend.repository.NotificationSettingRepository;
 
@@ -23,10 +25,13 @@ public class FollowUpService {
     private NotificationSettingRepository
             settingRepo;
 
+    @Autowired
+    private LeadRepository leadRepository;
+
     // FR 8 - Create FollowUp
-    public FollowUp createFollowUp(
-            FollowUpRequest request
-    ) {
+        public FollowUp createFollowUp(
+                FollowUpRequest request
+        ) {
 
         FollowUp followUp =
                 new FollowUp();
@@ -48,13 +53,13 @@ public class FollowUpService {
         );
 
         if(
-            request.getStatus()
-            != null
+                request.getStatus()
+                != null
         ){
 
-            followUp.setStatus(
-                    request.getStatus()
-            );
+                followUp.setStatus(
+                        request.getStatus()
+                );
 
         }
 
@@ -63,34 +68,51 @@ public class FollowUpService {
                 followUpRepository
                 .save(followUp);
 
+        // AMBIL DATA LEAD
+        Lead lead =
+                leadRepository
+                .findById(
+                        request.getLeadId().intValue()
+                )
+                .orElse(null);
+
+        String leadName =
+                lead != null
+                ? lead.getName()
+                : "Unknown Lead";
+
         // CEK SETTING NOTIF
         NotificationSetting setting =
                 settingRepo.findByUserId(
-                    request.getSalesId().intValue()
+                        request.getSalesId().intValue()
                 )
                 .orElse(null);
 
         // KIRIM IN APP NOTIF
         if(
 
-            setting != null &&
+                setting != null &&
 
-            Boolean.TRUE.equals(
+                Boolean.TRUE.equals(
                 setting.getFollowupApp()
-            )
+                )
 
         ){
 
-            notificationService.createNotification(
+                notificationService.createNotification(
 
-                    request.getSalesId().intValue(),
-                    "Reminder Follow Up",
-                    "Follow up baru berhasil dibuat"
+                        request.getSalesId().intValue(),
 
-            );
+                        "Reminder Follow Up",
+
+                        "Lead "
+                        + leadName
+                        + " masuk ke reminder follow up"
+
+                );
 
         }
 
         return saved;
-    }
+        }
 }

@@ -337,6 +337,61 @@ body {
   border: 2px solid var(--white);
 }
 
+.notif-wrapper{
+  position:relative;
+}
+
+.notif-dropdown{
+  position:absolute;
+  top:48px;
+  right:0;
+
+  width:320px;
+  max-height:400px;
+  overflow-y:auto;
+
+  background:white;
+
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+
+  box-shadow:
+    0 8px 24px rgba(
+      0,0,0,0.08
+    );
+
+  padding:12px;
+
+  z-index:999;
+}
+
+.notif-dropdown h4{
+  margin-bottom:12px;
+}
+
+.notif-item{
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:8px;
+}
+
+.notif-item.unread{
+  background:#eff6ff;
+}
+
+.notif-item.read{
+  background:#f9fafb;
+}
+
+.notif-item p{
+  margin:4px 0;
+  font-size:13px;
+}
+
+.notif-item small{
+  color:#6b7280;
+}
+
 /* ─────────────────────────────────────────────
    BODY SPLIT (settings-nav + content)
    ───────────────────────────────────────────── */

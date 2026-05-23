@@ -77,4 +77,25 @@ export const saveNotifSettings = async (
   return res.data;
 };
 
+export const getNotifications =
+async (userId)=>{
+
+const res =
+await axios.get(
+`${API_URL}/notifications/${userId}`
+);
+
+return res.data;
+
+};
+
+export const readNotification =
+async(id)=>{
+
+await axios.put(
+`${API_URL}/notifications/${id}/read`
+);
+
+};
+
 export default apiClient;

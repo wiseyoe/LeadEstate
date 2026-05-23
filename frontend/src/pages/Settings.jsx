@@ -3,7 +3,7 @@ import "../styles/Settings.css";
 import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
 import { updateProfile, getAllUsers, deleteUser, updateUserRole } from "../api/api";
-import { getNotifSettings, saveNotifSettings } from "../api/api";
+import { getNotifSettings, saveNotifSettings, getNotifications } from "../api/api";
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
@@ -935,6 +935,22 @@ export default function Settings() {
     }
   };
 
+  const [notifications, setNotifications] = useState([]);
+  const [showNotif, setShowNotif] = useState(false);
+
+  useEffect(() => {
+    loadNotif();
+  }, []);
+
+  const loadNotif = async () => {
+    try {
+      const data = await getNotifications(user.id);
+      setNotifications(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="settings-page">
 
@@ -1050,15 +1066,68 @@ export default function Settings() {
         {/* Topbar */}
         <div className="topbar">
           <div className="topbar-title">Pengaturan</div>
-          <div className="topbar-right">
-            <div className="date-chip">📅 {new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
-            <div className="notif-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
-                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-              </svg>
-              <div className="notif-dot" />
+            <div className="topbar-right">
+              <div className="date-chip">
+                📅 {new Date().toLocaleDateString(
+                  "id-ID",
+                  {
+                    weekday:"long",
+                    day:"numeric",
+                    month:"long",
+                    year:"numeric"
+                  }
+                )}
+              </div>
+              <div className="notif-wrapper">
+                <div
+                  className="notif-btn"
+                  onClick={() =>
+                    setShowNotif(!showNotif)
+                  }
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="#6b7280"
+                  >
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                  </svg>
+                  {notifications.some(
+                    n => !n.isRead
+                  ) && (
+                    <div className="notif-dot"/>
+                  )}
+                </div>
+                {showNotif && (
+                  <div className="notif-dropdown">
+                    <h4>Notifikasi</h4>
+                    {notifications.length === 0 ? (
+                      <p>Belum ada notif</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`notif-item ${
+                            n.isRead
+                              ? "read"
+                              : "unread"
+                          }`}
+                        >
+                          <b>{n.title}</b>
+                          <p>{n.message}</p>
+                          <small>
+                            {new Date(
+                              n.createdAt
+                            ).toLocaleString()}
+                          </small>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
         </div>
 
         {/* Body split */}

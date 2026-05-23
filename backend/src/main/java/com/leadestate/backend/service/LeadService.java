@@ -31,6 +31,9 @@ public class LeadService {
     @Autowired
     private NotificationSettingRepository notificationSettingRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public List<Lead> getLeadsByUser(User user) {
         if (user.isAdmin()) {
             return leadRepository.findAll();
@@ -96,18 +99,19 @@ public class LeadService {
             .orElse(null);
 
         if(
-            setting != null
+            setting!=null
             &&
             Boolean.TRUE.equals(
                 setting.getLeadApp()
             )
         ){
 
-            System.out.println(
-                "NOTIF APP -> Lead baru masuk untuk sales "
-                +
-                request.getSalesId()
-            );
+        notificationService.createNotification(
+            request.getSalesId(),
+            "Lead Baru",
+            "Lead baru masuk: "
+            +lead.getName()
+        );
 
         }
 
@@ -138,15 +142,96 @@ public class LeadService {
     // =========================
     // FR7 - Update Status Lead
     // =========================
-    public Lead updateStatus(int id, int statusId) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lead tidak ditemukan"));
+    public Lead updateStatus(
+        int id,
+        int statusId
+    ) {
 
-        LeadStatus status = leadStatusRepository.findById(statusId)
-                .orElseThrow(() -> new RuntimeException("Status tidak ditemukan"));
-        lead.changeStatus(status);
+        Lead lead =
+                leadRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                        new RuntimeException(
+                                "Lead tidak ditemukan"
+                        )
+                );
 
-        return leadRepository.save(lead);
+        LeadStatus status =
+                leadStatusRepository
+                .findById(
+                        statusId
+                )
+                .orElseThrow(
+                        () ->
+                        new RuntimeException(
+                                "Status tidak ditemukan"
+                        )
+                );
+
+        lead.changeStatus(
+                status
+        );
+
+        Lead saved =
+                leadRepository.save(
+                        lead
+                );
+
+        NotificationSetting setting =
+                notificationSettingRepository
+                .findByUserId(
+                        lead.getSalesId()
+                )
+                .orElse(null);
+
+        // STATUS BERUBAH
+        if(
+                setting != null
+                &&
+                Boolean.TRUE.equals(
+                        setting.getStatusApp()
+                )
+        ){
+
+            notificationService
+            .createNotification(
+                    lead.getSalesId(),
+                    "Status Lead",
+                    "Status berubah menjadi "
+                    + status.getStatusName()
+            );
+
+        }
+
+        // CLOSING
+        if(
+                setting != null
+                &&
+                Boolean.TRUE.equals(
+                        setting.getClosingApp()
+                )
+                &&
+                status.getStatusName()!=null
+                &&
+                status.getStatusName()
+                .equalsIgnoreCase(
+                        "Closed"
+                )
+        ){
+
+            notificationService
+            .createNotification(
+                    lead.getSalesId(),
+                    "Closing Berhasil",
+                    "Deal lead "
+                    + lead.getName()
+                    + " berhasil ditutup"
+            );
+
+        }
+
+        return saved;
     }
 
     // =========================
@@ -169,7 +254,12 @@ public class LeadService {
 
         lead.setStatus(status);
 
-        return leadRepository.save(lead);
+        Lead saved =
+                leadRepository.save(
+                        lead
+                );
+
+        return saved;
     }
 
     // =========================
