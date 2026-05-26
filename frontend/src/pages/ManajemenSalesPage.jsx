@@ -658,76 +658,155 @@ export default function ManajemenSalesPage() {
    * Response: created sales object with id
    */
   async function createSales(formData) {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/users`, {
-        method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const created = await res.json();
-      setSalesTeam((prev) => [...prev, created]);
-      setSelectedId(created.id);
-    } catch (err) {
-      console.error("ERROR createSales:", err);
-      alert("Gagal menambah data sales. Coba lagi.");
-    }
-  }
+  try {
+    const token = localStorage.getItem("token");
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  /**
-   * PUT /sales/:id
-   * Body: { name, phone, email, role, color, target, join }
-   * Response: updated sales object
-   */
-  async function updateSales(id, formData) {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/users/${id}`, {
-        method: "PUT",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json();
-      setSalesTeam((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, ...updated } : s))
-      );
-    } catch (err) {
-      console.error("ERROR updateSales:", err);
-      alert("Gagal mengupdate data sales. Coba lagi.");
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: "sales123",
+      roleId: 3,
+    };
+
+    const res = await fetch(`${API}/api/users`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Role: currentUser.role || "Admin",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text);
     }
+
+    const created = JSON.parse(text);
+
+    const mapped = {
+      id: created.id,
+      name: created.name,
+      email: created.email,
+      phone: created.phone,
+      role: "Sales",
+      color: COLORS[salesTeam.length % COLORS.length],
+      target: 10,
+      closing: 0,
+      followup: 0,
+      online: false,
+      join: null,
+      leads: [],
+      activity: [],
+    };
+
+    setSalesTeam((prev) => [...prev, mapped]);
+    setSelectedId(mapped.id);
+
+    alert("Sales berhasil ditambahkan");
+
+  } catch (err) {
+    console.error("ERROR createSales:", err);
+    alert("Gagal menambah sales:\n" + err.message);
   }
+}
+ async function updateSales(id, formData) {
+  try {
+    const token = localStorage.getItem("token");
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+    const existing = salesTeam.find((s) => s.id === id);
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: "sales123",
+      roleId: 3,
+    };
+
+    const res = await fetch(`${API}/api/users/${id}`, {
+      method: "PUT",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Role: currentUser.role || "Admin",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text);
+    }
+
+    const updated = JSON.parse(text);
+
+    setSalesTeam((prev) =>
+      prev.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              name: updated.name,
+              email: updated.email,
+              phone: updated.phone,
+            }
+          : s
+      )
+    );
+
+    alert("Sales berhasil diupdate");
+
+  } catch (err) {
+    console.error("ERROR updateSales:", err);
+    alert("Gagal update sales:\n" + err.message);
+  }
+}
 
   /**
    * DELETE /sales/:id
    * Response: { success: true }
    */
-  async function deleteSales(id) {
-    if (!confirm("Hapus data sales ini?")) return;
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/api/users/${id}`, {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setSalesTeam((prev) => prev.filter((s) => s.id !== id));
-      if (selectedId === id) {
-        const remaining = salesTeam.filter((s) => s.id !== id);
-        setSelectedId(remaining.length > 0 ? remaining[0].id : null);
-      }
-    } catch (err) {
-      console.error("ERROR deleteSales:", err);
-      alert("Gagal menghapus data sales. Coba lagi.");
+ async function deleteSales(id) {
+  if (!confirm("Hapus data sales ini?")) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+    const res = await fetch(`${API}/api/users/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Role: currentUser.role || "Admin",
+      },
+    });
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text);
     }
+
+    setSalesTeam((prev) => prev.filter((s) => s.id !== id));
+
+    if (selectedId === id) {
+      const remaining = salesTeam.filter((s) => s.id !== id);
+      setSelectedId(remaining.length > 0 ? remaining[0].id : null);
+    }
+
+    alert("Sales berhasil dihapus");
+
+  } catch (err) {
+    console.error("ERROR deleteSales:", err);
+    alert("Gagal hapus sales:\n" + err.message);
   }
+}
 
   useEffect(() => {
     fetchSales();
