@@ -203,11 +203,29 @@ function ProfileCard({ sales, onEdit, onDelete }) {
 
           <div className="profile-actions">
             <button
-              className="pa-btn wa"
-              onClick={() => alert(`Buka WhatsApp untuk ${sales.name}`)}
-            >
-              💬 WA
-            </button>
+  className="pa-btn wa"
+  onClick={() => {
+    if (!sales.phone) {
+      alert("Nomor HP tidak tersedia");
+      return;
+    }
+
+    let phone = sales.phone.replace(/\D/g, "");
+
+    if (phone.startsWith("08")) {
+      phone = "62" + phone.slice(1);
+    }
+
+    const text = `Halo ${sales.name}, bagaimana progress lead hari ini?`;
+
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+      "_blank"
+    );
+  }}
+>
+  💬 WA
+</button>
             <button className="pa-btn edit" onClick={() => onEdit(sales)}>
               ✏️ Edit
             </button>
@@ -426,130 +444,208 @@ function DetailPanel({ sales, onEdit, onDelete }) {
 // ── SALES MODAL ───────────────────────────────────────────────────────────────
 function SalesModal({ isOpen, editData, onClose, onSave }) {
   const [form, setForm] = useState({
-    name: "", phone: "", email: "", role: "Sales Agent",
-    target: 3, join: new Date().toISOString().split("T")[0], color: COLORS[0],
+    name: "",
+    phone: "",
+    email: "",
+    role: "Sales",
+    target: 3,
+    join: new Date().toISOString().split("T")[0],
+    color: COLORS[0],
   });
 
   useEffect(() => {
     if (editData) {
       setForm({
-        name:   editData.name  || "",
-        phone:  editData.phone || "",
-        email:  editData.email || "",
-        role:   editData.role  || "Sales Agent",
+        name: editData.name || "",
+        phone: editData.phone || "",
+        email: editData.email || "",
+        role: "Sales",
         target: editData.target || 3,
-        join:   editData.join  || new Date().toISOString().split("T")[0],
-        color:  editData.color || COLORS[0],
+        join:
+          editData.join || new Date().toISOString().split("T")[0],
+        color: editData.color || COLORS[0],
       });
     } else {
       setForm({
-        name: "", phone: "", email: "", role: "Sales Agent",
-        target: 3, join: new Date().toISOString().split("T")[0], color: COLORS[0],
+        name: "",
+        phone: "",
+        email: "",
+        role: "Sales",
+        target: 3,
+        join: new Date().toISOString().split("T")[0],
+        color: COLORS[0],
       });
     }
   }, [editData, isOpen]);
 
   function handleChange(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   }
 
   function handleSubmit() {
     if (!form.name.trim() || !form.phone.trim()) {
-      alert("Nama dan HP wajib diisi!");
+      alert("Nama dan Nomor HP wajib diisi!");
       return;
     }
+
     onSave(form);
   }
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="modal-overlay"
+      onClick={(e) =>
+        e.target === e.currentTarget && onClose()
+      }
+    >
       <div className="modal">
+        {/* HEADER */}
         <div className="modal-head">
-          <div className="modal-title">{editData ? "Edit Data Sales" : "Tambah Sales Baru"}</div>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <div className="modal-title">
+            {editData
+              ? "Edit Data Sales"
+              : "Tambah Sales Baru"}
+          </div>
+
+          <button
+            className="modal-close"
+            onClick={onClose}
+          >
+            ✕
+          </button>
         </div>
 
+        {/* BODY */}
         <div className="modal-body">
+          {/* ROW 1 */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Nama Lengkap *</label>
+              <label className="form-label">
+                Nama Lengkap *
+              </label>
+
               <input
                 className="form-input"
+                type="text"
                 placeholder="Contoh: Budi Santoso"
                 value={form.name}
-                onChange={(e) => handleChange("name", e.target.value)}
+                onChange={(e) =>
+                  handleChange("name", e.target.value)
+                }
               />
             </div>
+
             <div className="form-group">
-              <label className="form-label">Nomor HP *</label>
+              <label className="form-label">
+                Nomor HP *
+              </label>
+
               <input
                 className="form-input"
+                type="text"
                 placeholder="0812-xxxx-xxxx"
                 value={form.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
+                onChange={(e) =>
+                  handleChange("phone", e.target.value)
+                }
               />
             </div>
           </div>
 
+          {/* ROW 2 */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">
+                Email
+              </label>
+
               <input
                 className="form-input"
+                type="email"
                 placeholder="email@domain.com"
                 value={form.email}
-                onChange={(e) => handleChange("email", e.target.value)}
+                onChange={(e) =>
+                  handleChange("email", e.target.value)
+                }
               />
             </div>
+
             <div className="form-group">
-              <label className="form-label">Jabatan</label>
-              <select
-                className="form-select"
-                value={form.role}
-                onChange={(e) => handleChange("role", e.target.value)}
-              >
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
+              <label className="form-label">
+                Jabatan
+              </label>
+
+              {/* FIXED ROLE */}
+              <input
+                className="form-input"
+                type="text"
+                value="Sales"
+                disabled
+              />
             </div>
           </div>
 
+          {/* ROW 3 */}
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Target Closing / Bulan</label>
+              <label className="form-label">
+                Target Closing / Bulan
+              </label>
+
               <input
                 className="form-input"
                 type="number"
                 min="1"
                 placeholder="Contoh: 5"
                 value={form.target}
-                onChange={(e) => handleChange("target", parseInt(e.target.value) || 1)}
+                onChange={(e) =>
+                  handleChange(
+                    "target",
+                    parseInt(e.target.value) || 1
+                  )
+                }
               />
             </div>
+
             <div className="form-group">
-              <label className="form-label">Bergabung Sejak</label>
+              <label className="form-label">
+                Bergabung Sejak
+              </label>
+
               <input
                 className="form-input"
                 type="date"
                 value={form.join}
-                onChange={(e) => handleChange("join", e.target.value)}
+                onChange={(e) =>
+                  handleChange("join", e.target.value)
+                }
               />
             </div>
           </div>
 
+          {/* COLOR */}
           <div className="form-row form-row-full">
             <div className="form-group">
-              <label className="form-label">Warna Avatar</label>
+              <label className="form-label">
+                Warna Avatar
+              </label>
+
               <div className="color-row">
                 {COLORS.map((c) => (
                   <div
                     key={c}
-                    className={`color-opt${form.color === c ? " sel" : ""}`}
+                    className={`color-opt${
+                      form.color === c ? " sel" : ""
+                    }`}
                     style={{ background: c }}
-                    onClick={() => handleChange("color", c)}
+                    onClick={() =>
+                      handleChange("color", c)
+                    }
                   />
                 ))}
               </div>
@@ -557,9 +653,21 @@ function SalesModal({ isOpen, editData, onClose, onSave }) {
           </div>
         </div>
 
+        {/* FOOTER */}
         <div className="modal-foot">
-          <button className="btn-cancel" onClick={onClose}>Batal</button>
-          <button className="btn-save" onClick={handleSubmit}>💾 Simpan</button>
+          <button
+            className="btn-cancel"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+
+          <button
+            className="btn-save"
+            onClick={handleSubmit}
+          >
+            💾 Simpan
+          </button>
         </div>
       </div>
     </div>
