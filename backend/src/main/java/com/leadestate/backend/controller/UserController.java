@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.leadestate.backend.entity.User;
 import com.leadestate.backend.service.UserService;
 import com.leadestate.backend.service.AuthService;
+import com.leadestate.backend.repository.LeadRepository;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class UserController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private LeadRepository leadRepository;
 
     // =========================
     // GET ALL USERS (Admin Only)
@@ -128,6 +132,39 @@ public class UserController {
             // Karena tidak ada checkAdmin, langsung lempar BAD_REQUEST (atau NOT_FOUND)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(e.getMessage());
+        }
+    }
+
+    // =========================
+    // GET SALES STATS (closing, followup, leads bulan ini)
+    // =========================
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<?> getSalesStats(
+            @RequestHeader("Role") String role,
+            @PathVariable Integer id
+    ) {
+        try {
+            authService.checkAdmin(role);
+
+            int month = java.time.LocalDate.now().getMonthValue();
+            int year  = java.time.LocalDate.now().getYear();
+
+            long closing    = leadRepository.countClosingBySalesAndMonth(id, month, year);
+            long followup   = leadRepository.countFollowUpBySalesAndMonth(id, month, year);
+            long leadsTotal = leadRepository.countLeadsBySalesAndMonth(id, month, year);
+
+            java.util.List<java.util.Map<String, Object>> leads =
+                leadRepository.findLeadsBySalesAndMonth(id, month, year);
+
+            java.util.Map<String, Object> result = new java.util.HashMap<>();
+            result.put("closing",    closing);
+            result.put("followup",   followup);
+            result.put("leadsTotal", leadsTotal);
+            result.put("leads",      leads);
+
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return handleUserException(e);
         }
     }
 
