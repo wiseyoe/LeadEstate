@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import "../styles/dataLead.css";
 import { useNavigate } from "react-router-dom";
+import "../styles/Dashboard.css";
+import logo from "../assets/leadestate-logo.png";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -51,87 +53,141 @@ function formatRupiah(num) {
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 function Sidebar() {
   const navigate = useNavigate();
+
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const isAdmin =
-    user?.role?.toLowerCase() === "admin";
+  const isAdmin = user?.role?.toLowerCase() === "admin";
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <div className="brand-icon">L</div>
-        <div className="brand-name">Lead<span>Estate</span></div>
+    <aside className="le-sidebar">
+      <div className="le-brand">
+        <img src={logo} alt="LeadEstate Logo" className="brand-logo" />
+
+        <div className="le-brand-name">
+          Lead<span>Estate</span>
+        </div>
       </div>
 
-      <nav className="nav">
-        <div className="nav-label">Menu Utama</div>
+      <nav className="le-nav">
+        <div className="le-nav-label">Menu Utama</div>
 
-        <div className="nav-item" onClick={() => navigate("/dashboard")}>
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-          </svg>
+        {/* DASHBOARD */}
+        <div className="le-nav-item" onClick={() => navigate("/dashboard")}>
+          <span className="le-nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </span>
           Dashboard
         </div>
 
-        <div className="nav-item" onClick={() => navigate("/reminder")}>
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-          </svg>
-          Reminder &amp; Follow Up
-          <span className="nav-badge">5</span>
+        {/* REMINDER */}
+        <div className="le-nav-item" onClick={() => navigate("/reminder")}>
+          <span className="le-nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10,8 16,12 10,16" fill="currentColor" />
+            </svg>
+          </span>
+          Reminder &amp; Follow-Up
+          <span className="le-nav-badge">5</span>
         </div>
 
-        <div className="nav-item active">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
+        {/* DATA LEAD */}
+        <div className="le-nav-item active">
+          <span className="le-nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+            </svg>
+          </span>
           Data Lead
         </div>
 
-        {/* KHUSUS ADMIN */}
+        {/* ADMIN ONLY */}
         {isAdmin && (
           <>
             <div
-              className="nav-item"
+              className="le-nav-item"
               onClick={() => navigate("/Manajemen_sales")}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
-              </svg>
+              <span className="le-nav-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <rect x="2" y="3" width="20" height="18" rx="2" />
+                  <circle cx="12" cy="10" r="3" />
+                  <path d="M7 21v-1a5 5 0 0 1 10 0v1" />
+                </svg>
+              </span>
               Manajemen Sales
             </div>
 
-            <div className="nav-label">Laporan</div>
+            <div className="le-nav-label">Laporan</div>
 
-            <div
-              className="nav-item"
-              onClick={() => navigate("/laporan")}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-              </svg>
+            <div className="le-nav-item" onClick={() => navigate("/laporan")}>
+              <span className="le-nav-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </span>
               Laporan &amp; Statistik
             </div>
           </>
         )}
 
-        <div
-          className="nav-item"
-          style={{ marginTop:8 }}
-          onClick={() => navigate("/settings")}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-          </svg>
+        {/* SETTINGS */}
+        <div className="le-nav-item" onClick={() => navigate("/settings")}>
+          <span className="le-nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            </svg>
+          </span>
           Pengaturan
         </div>
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="avatar">{initials(user.name || "AR")}</div>
-        <div className="user-info">
-          <div className="name">{user.name || "Admin"}</div>
-          <div className="role">{user.role || "Administrator"}</div>
+      <div className="le-sidebar-footer">
+        <div className="le-avatar">{initials(user.name || "AR")}</div>
+
+        <div>
+          <div className="le-user-name">{user.name || "Admin"}</div>
+
+          <div className="le-user-role">{user.role || "Administrator"}</div>
         </div>
       </div>
     </aside>
@@ -420,9 +476,19 @@ export default function DataLead() {
         <div className="topbar">
           <div className="topbar-title">Data Lead</div>
           <div className="topbar-right">
-            <div className="date-chip">📅 {new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
+            <div className="date-chip">
+              📅{" "}
+              {new Date().toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
             <div className="notif-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+              </svg>
               <div className="notif-dot" />
             </div>
           </div>
@@ -432,24 +498,79 @@ export default function DataLead() {
           {/* TOOLBAR */}
           <div className="toolbar">
             <div className="search-wrap">
-              <svg className="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-              <input className="search-input" placeholder="Cari nama, nomor, atau properti..."
-                value={searchQ} onChange={e => { setSearchQ(e.target.value); setPage(1); }} />
+              <svg
+                className="search-icon"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+              </svg>
+              <input
+                className="search-input"
+                placeholder="Cari nama, nomor, atau properti..."
+                value={searchQ}
+                onChange={(e) => {
+                  setSearchQ(e.target.value);
+                  setPage(1);
+                }}
+              />
             </div>
-            <select className="filter-select" value={filterStatus}
-              onChange={e => { setFilterStatus(e.target.value); setPage(1); }}>
-              {STATUS_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.lbl}</option>)}
+            <select
+              className="filter-select"
+              value={filterStatus}
+              onChange={(e) => {
+                setFilterStatus(e.target.value);
+                setPage(1);
+              }}
+            >
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.val} value={o.val}>
+                  {o.lbl}
+                </option>
+              ))}
             </select>
-            <select className="filter-select" value={filterSource}
-              onChange={e => { setFilterSource(e.target.value); setPage(1); }}>
-              {SOURCE_OPTIONS.map(s => <option key={s} value={s}>{s || "Semua Sumber"}</option>)}
+            <select
+              className="filter-select"
+              value={filterSource}
+              onChange={(e) => {
+                setFilterSource(e.target.value);
+                setPage(1);
+              }}
+            >
+              {SOURCE_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s || "Semua Sumber"}
+                </option>
+              ))}
             </select>
             <button className="export-btn" onClick={exportCSV}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+              </svg>
               Export
             </button>
-            <button className="add-btn" onClick={() => { setEditData(null); setModalOpen(true); }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <button
+              className="add-btn"
+              onClick={() => {
+                setEditData(null);
+                setModalOpen(true);
+              }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              </svg>
               Tambah Lead
             </button>
           </div>
@@ -457,14 +578,36 @@ export default function DataLead() {
           {/* STAT STRIP */}
           <div className="stat-strip">
             {[
-              { icon:"📋", bg:"#fef3cd", val:stats.total,   lbl:"Total Lead"   },
-              { icon:"🆕", bg:"#dbeafe", val:stats.newLead,  lbl:"New Lead"     },
-              { icon:"🔄", bg:"#fef3cd", val:stats.followUp, lbl:"Follow Up"    },
-              { icon:"✅", bg:"#dcfce7", val:stats.closed,   lbl:"Closing"      },
-              { icon:"📈", bg:"#dbeafe", val:`${stats.rate}%`, lbl:"Closing Rate"},
-            ].map((s,i) => (
+              {
+                icon: "📋",
+                bg: "#fef3cd",
+                val: stats.total,
+                lbl: "Total Lead",
+              },
+              {
+                icon: "🆕",
+                bg: "#dbeafe",
+                val: stats.newLead,
+                lbl: "New Lead",
+              },
+              {
+                icon: "🔄",
+                bg: "#fef3cd",
+                val: stats.followUp,
+                lbl: "Follow Up",
+              },
+              { icon: "✅", bg: "#dcfce7", val: stats.closed, lbl: "Closing" },
+              {
+                icon: "📈",
+                bg: "#dbeafe",
+                val: `${stats.rate}%`,
+                lbl: "Closing Rate",
+              },
+            ].map((s, i) => (
               <div key={i} className="sstrip">
-                <div className="sstrip-icon" style={{ background:s.bg }}>{s.icon}</div>
+                <div className="sstrip-icon" style={{ background: s.bg }}>
+                  {s.icon}
+                </div>
                 <div>
                   <div className="sstrip-val">{s.val}</div>
                   <div className="sstrip-lbl">{s.lbl}</div>
@@ -479,29 +622,70 @@ export default function DataLead() {
             {selected.size > 0 && (
               <div className="bulk-bar show">
                 <span>{selected.size} lead dipilih</span>
-                <button className="bulk-btn gold" onClick={() => alert("Assign sales...")}>Assign Sales</button>
-                <button className="bulk-btn danger" onClick={() => { setSelected(new Set()); }}>Batal Pilih</button>
-                <span className="bulk-close" onClick={() => setSelected(new Set())}>✕ Batal</span>
+                <button
+                  className="bulk-btn gold"
+                  onClick={() => alert("Assign sales...")}
+                >
+                  Assign Sales
+                </button>
+                <button
+                  className="bulk-btn danger"
+                  onClick={() => {
+                    setSelected(new Set());
+                  }}
+                >
+                  Batal Pilih
+                </button>
+                <span
+                  className="bulk-close"
+                  onClick={() => setSelected(new Set())}
+                >
+                  ✕ Batal
+                </span>
               </div>
             )}
 
             <div className="table-header">
               <div className="th-title">
                 Daftar Semua Lead{" "}
-                <span style={{ fontSize:12, color:"var(--text-muted)", fontWeight:400 }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    fontWeight: 400,
+                  }}
+                >
                   ({filtered.length} lead)
                 </span>
               </div>
               <div className="th-right">
                 <div className="view-toggle">
-                  <button className={`vt-btn${view==="table"?" active":""}`} onClick={() => setView("table")}>☰ Tabel</button>
-                  <button className={`vt-btn${view==="card"?" active":""}`}  onClick={() => setView("card")}>⊞ Kartu</button>
+                  <button
+                    className={`vt-btn${view === "table" ? " active" : ""}`}
+                    onClick={() => setView("table")}
+                  >
+                    ☰ Tabel
+                  </button>
+                  <button
+                    className={`vt-btn${view === "card" ? " active" : ""}`}
+                    onClick={() => setView("card")}
+                  >
+                    ⊞ Kartu
+                  </button>
                 </div>
               </div>
             </div>
 
             {loading ? (
-              <div style={{ padding:40, textAlign:"center", color:"var(--text-muted)" }}>Memuat data...</div>
+              <div
+                style={{
+                  padding: 40,
+                  textAlign: "center",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Memuat data...
+              </div>
             ) : view === "table" ? (
               <>
                 <div className="table-wrap">
@@ -509,9 +693,16 @@ export default function DataLead() {
                     <thead>
                       <tr>
                         <th className="td-check">
-                          <input type="checkbox" onChange={toggleAll}
-                            checked={selected.size === paginated.length && paginated.length > 0} />
+                          <input
+                            type="checkbox"
+                            onChange={toggleAll}
+                            checked={
+                              selected.size === paginated.length &&
+                              paginated.length > 0
+                            }
+                          />
                         </th>
+                        <th>ID</th>
                         <th>Nama Lead</th>
                         <th>Properti</th>
                         <th>Status</th>
@@ -524,48 +715,108 @@ export default function DataLead() {
                     </thead>
                     <tbody>
                       {paginated.length === 0 ? (
-                        <tr><td colSpan={9} style={{ textAlign:"center", padding:32, color:"var(--text-muted)" }}>Tidak ada lead ditemukan</td></tr>
-                      ) : paginated.map((l, idx) => {
-                        const statusName = l.status?.statusName ?? "–";
-                        const tag = STATUS_TAG[statusName] ?? { cls:"tag-cold", lbl: statusName };
-                        const color = COLORS[l.id % COLORS.length];
-                        return (
-                          <tr key={l.id}>
-                            <td className="td-check">
-                              <input type="checkbox" checked={selected.has(l.id)}
-                                onChange={() => toggleSelect(l.id)} />
-                            </td>
-                            <td>
-                              <div className="lead-cell">
-                                <div className="lc-av" style={{ background:color }}>{initials(l.name)}</div>
-                                <div>
-                                  <div className="lc-nm">{l.name}</div>
-                                  <div className="lc-ph">{l.phone}</div>
+                        <tr>
+                          <td
+                            colSpan={9}
+                            style={{
+                              textAlign: "center",
+                              padding: 32,
+                              color: "var(--text-muted)",
+                            }}
+                          >
+                            Tidak ada lead ditemukan
+                          </td>
+                        </tr>
+                      ) : (
+                        paginated.map((l, idx) => {
+                          const statusName = l.status?.statusName ?? "–";
+                          const tag = STATUS_TAG[statusName] ?? {
+                            cls: "tag-cold",
+                            lbl: statusName,
+                          };
+                          const color = COLORS[l.id % COLORS.length];
+                          return (
+                            <tr key={l.id}>
+                              <td className="td-check">
+                                <input
+                                  type="checkbox"
+                                  checked={selected.has(l.id)}
+                                  onChange={() => toggleSelect(l.id)}
+                                />
+                              </td>
+
+                              <td>#{l.id}</td>  
+                              
+                              <td>
+                                <div className="lead-cell">
+                                  <div
+                                    className="lc-av"
+                                    style={{ background: color }}
+                                  >
+                                    {initials(l.name)}
+                                  </div>
+                                  <div>
+                                    <div className="lc-nm">{l.name}</div>
+                                    <div className="lc-ph">{l.phone}</div>
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td>{l.property?.name ?? "–"}</td>
-                            <td><span className={`tag ${tag.cls}`}>{tag.lbl}</span></td>
-                            <td>{l.source ?? "–"}</td>
-                            <td>{l.sales?.name ?? "–"}</td>
-                            <td>{formatRupiah(l.property?.price)}</td>
-                            <td>{formatDate(l.createdAt)}</td>
-                            <td>
-                              <div className="action-cell">
-                                <button className="ic-btn view" title="Detail" onClick={() => setDetailLead(l)}>
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                                </button>
-                                <button className="ic-btn edit" title="Edit Status" onClick={() => {
-                                  const newStatusId = prompt("Masukkan ID status baru (1-6):", l.status?.id);
-                                  if (newStatusId) updateLeadStatus(l.id, parseInt(newStatusId));
-                                }}>
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              </td>
+                              <td>{l.property?.name ?? "–"}</td>
+                              <td>
+                                <span className={`tag ${tag.cls}`}>
+                                  {tag.lbl}
+                                </span>
+                              </td>
+                              <td>{l.source ?? "–"}</td>
+                              <td>{l.sales?.name ?? "–"}</td>
+                              <td>{formatRupiah(l.property?.price)}</td>
+                              <td>{formatDate(l.createdAt)}</td>
+                              <td>
+                                <div className="action-cell">
+                                  <button
+                                    className="ic-btn view"
+                                    title="Detail"
+                                    onClick={() => setDetailLead(l)}
+                                  >
+                                    <svg
+                                      width="13"
+                                      height="13"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    className="ic-btn edit"
+                                    title="Edit Status"
+                                    onClick={() => {
+                                      const newStatusId = prompt(
+                                        "Masukkan ID status baru (1-6):",
+                                        l.status?.id,
+                                      );
+                                      if (newStatusId)
+                                        updateLeadStatus(
+                                          l.id,
+                                          parseInt(newStatusId),
+                                        );
+                                    }}
+                                  >
+                                    <svg
+                                      width="13"
+                                      height="13"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -573,42 +824,140 @@ export default function DataLead() {
                 {/* PAGINATION */}
                 <div className="pagination">
                   <div className="pg-info">
-                    Menampilkan {Math.min((page-1)*ROWS_PER_PAGE+1, filtered.length)}–{Math.min(page*ROWS_PER_PAGE, filtered.length)} dari {filtered.length} lead
+                    Menampilkan{" "}
+                    {Math.min((page - 1) * ROWS_PER_PAGE + 1, filtered.length)}–
+                    {Math.min(page * ROWS_PER_PAGE, filtered.length)} dari{" "}
+                    {filtered.length} lead
                   </div>
                   <div className="pg-btns">
-                    <button className="pg-btn" disabled={page===1} onClick={() => setPage(p => p-1)}>‹</button>
-                    {Array.from({ length: totalPages }, (_,i) => i+1)
-                      .filter(p => p===1 || p===totalPages || Math.abs(p-page)<=1)
-                      .map((p,i,arr) => (
+                    <button
+                      className="pg-btn"
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => p - 1)}
+                    >
+                      ‹
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === totalPages ||
+                          Math.abs(p - page) <= 1,
+                      )
+                      .map((p, i, arr) => (
                         <>
-                          {i>0 && arr[i-1]!==p-1 && <span key={`e${p}`} style={{ padding:"0 4px", color:"var(--text-muted)" }}>…</span>}
-                          <button key={p} className={`pg-btn${page===p?" active":""}`} onClick={() => setPage(p)}>{p}</button>
+                          {i > 0 && arr[i - 1] !== p - 1 && (
+                            <span
+                              key={`e${p}`}
+                              style={{
+                                padding: "0 4px",
+                                color: "var(--text-muted)",
+                              }}
+                            >
+                              …
+                            </span>
+                          )}
+                          <button
+                            key={p}
+                            className={`pg-btn${page === p ? " active" : ""}`}
+                            onClick={() => setPage(p)}
+                          >
+                            {p}
+                          </button>
                         </>
                       ))}
-                    <button className="pg-btn" disabled={page===totalPages} onClick={() => setPage(p => p+1)}>›</button>
+                    <button
+                      className="pg-btn"
+                      disabled={page === totalPages}
+                      onClick={() => setPage((p) => p + 1)}
+                    >
+                      ›
+                    </button>
                   </div>
                 </div>
               </>
             ) : (
               /* CARD VIEW */
-              <div style={{ padding:16, display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))", gap:12 }}>
-                {paginated.map(l => {
+              <div
+                style={{
+                  padding: 16,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+                  gap: 12,
+                }}
+              >
+                {paginated.map((l) => {
                   const statusName = l.status?.statusName ?? "–";
-                  const tag = STATUS_TAG[statusName] ?? { cls:"tag-cold", lbl: statusName };
+                  const tag = STATUS_TAG[statusName] ?? {
+                    cls: "tag-cold",
+                    lbl: statusName,
+                  };
                   const color = COLORS[l.id % COLORS.length];
                   return (
-                    <div key={l.id} className="lead-kard" onClick={() => setDetailLead(l)}>
-                      <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:10 }}>
-                        <div className="lc-av" style={{ background:color, width:36, height:36, fontSize:13 }}>{initials(l.name)}</div>
-                        <div>
-                          <div style={{ fontWeight:700, fontSize:13 }}>{l.name}</div>
-                          <div style={{ fontSize:11, color:"var(--text-muted)" }}>{l.phone}</div>
+                    <div
+                      key={l.id}
+                      className="lead-kard"
+                      onClick={() => setDetailLead(l)}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 10,
+                          alignItems: "center",
+                          marginBottom: 10,
+                        }}
+                      >
+                        <div
+                          className="lc-av"
+                          style={{
+                            background: color,
+                            width: 36,
+                            height: 36,
+                            fontSize: 13,
+                          }}
+                        >
+                          {initials(l.name)}
                         </div>
-                        <span className={`tag ${tag.cls}`} style={{ marginLeft:"auto" }}>{tag.lbl}</span>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 13 }}>
+                            {l.name}
+                          </div>
+                          <div
+                            style={{ fontSize: 11, color: "var(--text-muted)" }}
+                          >
+                            {l.phone}
+                          </div>
+                        </div>
+                        <span
+                          className={`tag ${tag.cls}`}
+                          style={{ marginLeft: "auto" }}
+                        >
+                          {tag.lbl}
+                        </span>
                       </div>
-                      <div style={{ fontSize:12, color:"var(--text-secondary)" }}>🏠 {l.property?.name ?? "–"}</div>
-                      <div style={{ fontSize:12, color:"var(--text-secondary)", marginTop:4 }}>📣 {l.source ?? "–"}</div>
-                      <div style={{ fontSize:12, color:"var(--text-secondary)", marginTop:4 }}>👤 {l.sales?.name ?? "–"}</div>
+                      <div
+                        style={{ fontSize: 12, color: "var(--text-secondary)" }}
+                      >
+                        🏠 {l.property?.name ?? "–"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "var(--text-secondary)",
+                          marginTop: 4,
+                        }}
+                      >
+                        📣 {l.source ?? "–"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "var(--text-secondary)",
+                          marginTop: 4,
+                        }}
+                      >
+                        👤 {l.sales?.name ?? "–"}
+                      </div>
                     </div>
                   );
                 })}
