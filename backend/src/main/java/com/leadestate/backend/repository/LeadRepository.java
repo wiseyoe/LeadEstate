@@ -83,6 +83,71 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     @Query("SELECT l.source, COUNT(l) FROM Lead l GROUP BY l.source ORDER BY COUNT(l) DESC")
     List<Object[]> countLeadsBySource();
 
+    // ── STATS PER SALES PER BULAN (untuk Manajemen Sales) ──────────────────────
+
+    // Hitung closing (status_id = 5) per sales per bulan
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM leads
+        WHERE sales_id = :salesId
+          AND status_id = 5
+          AND MONTH(created_at) = :month
+          AND YEAR(created_at) = :year
+    """, nativeQuery = true)
+    long countClosingBySalesAndMonth(
+        @org.springframework.data.repository.query.Param("salesId") int salesId,
+        @org.springframework.data.repository.query.Param("month")   int month,
+        @org.springframework.data.repository.query.Param("year")    int year
+    );
+
+    // Hitung follow up per sales per bulan
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM leads
+        WHERE sales_id = :salesId
+          AND MONTH(created_at) = :month
+          AND YEAR(created_at) = :year
+    """, nativeQuery = true)
+    long countFollowUpBySalesAndMonth(
+        @org.springframework.data.repository.query.Param("salesId") int salesId,
+        @org.springframework.data.repository.query.Param("month")   int month,
+        @org.springframework.data.repository.query.Param("year")    int year
+    );
+
+    // Hitung total lead per sales per bulan
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM leads
+        WHERE sales_id = :salesId
+          AND MONTH(created_at) = :month
+          AND YEAR(created_at) = :year
+    """, nativeQuery = true)
+    long countLeadsBySalesAndMonth(
+        @org.springframework.data.repository.query.Param("salesId") int salesId,
+        @org.springframework.data.repository.query.Param("month")   int month,
+        @org.springframework.data.repository.query.Param("year")    int year
+    );
+
+    // Ambil list lead per sales per bulan (untuk tampil di detail card)
+    @Query(value = """
+        SELECT l.name AS name,
+               p.name AS propertyName,
+               ls.status_name AS statusName
+        FROM leads l
+        LEFT JOIN properties p  ON l.property_id = p.id
+        LEFT JOIN lead_status ls ON l.status_id  = ls.id
+        WHERE l.sales_id = :salesId
+          AND MONTH(l.created_at) = :month
+          AND YEAR(l.created_at)  = :year
+        ORDER BY l.created_at DESC
+        LIMIT 10
+    """, nativeQuery = true)
+    java.util.List<java.util.Map<String, Object>> findLeadsBySalesAndMonth(
+        @org.springframework.data.repository.query.Param("salesId") int salesId,
+        @org.springframework.data.repository.query.Param("month")   int month,
+        @org.springframework.data.repository.query.Param("year")    int year
+    );
+
     // ── BARU: Estimasi revenue dari lead Closed (status_id = 5) × harga property
     @Query(value = """
         SELECT COALESCE(SUM(p.price), 0)
