@@ -719,25 +719,18 @@ export default function ManajemenSalesPage() {
     setLoading(true);
 
     const token = localStorage.getItem("token");
-
-    // ambil user dari localStorage
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const headers = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Role: currentUser.role || "Admin",
+    };
 
-    const res = await fetch(`${API}/api/users`, {
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        Role: currentUser.role || "Admin",
-      },
-    });
-
-    console.log("STATUS:", res.status);
+    const res = await fetch(`${API}/api/users`, { headers });
 
     const rawText = await res.text();
     console.log("RAW RESPONSE:", rawText);
 
-    if (!res.ok) {
-      throw new Error(rawText);
-    }
+    if (!res.ok) throw new Error(rawText);
 
     const data = JSON.parse(rawText);
 
@@ -745,21 +738,45 @@ export default function ManajemenSalesPage() {
       (u) => u.roleId === 3
     );
 
-    const mapped = salesOnly.map((u, i) => ({
-      id: u.id,
-      name: u.name ?? "–",
-      email: u.email ?? "–",
-      phone: u.phone ?? "–",
-      role: "Sales",
-      color: COLORS[i % COLORS.length],
-      target: 10,
-      closing: 0,
-      followup: 0,
-      online: false,
-      join: null,
-      leads: [],
-      activity: [],
-    }));
+    // Fetch stats (closing, followup, leads) tiap sales secara paralel
+    const mapped = await Promise.all(
+      salesOnly.map(async (u, i) => {
+        let closing = 0, followup = 0, leads = [], leadsTotal = 0;
+        try {
+          const statsRes = await fetch(`${API}/api/users/${u.id}/stats`, { headers });
+          if (statsRes.ok) {
+            const stats = await statsRes.json();
+            closing    = stats.closing    ?? 0;
+            followup   = stats.followup   ?? 0;
+            leadsTotal = stats.leadsTotal ?? 0;
+            leads      = (stats.leads     ?? []).slice(0, 10).map((l) => ({
+              name:   l.name   ?? "–",
+              prop:   l.propertyName ?? l.property ?? "–",
+              status: l.statusName?.toLowerCase() ?? "new",
+            }));
+          }
+        } catch (_) {
+          console.warn(`Gagal fetch stats untuk user ${u.id}`);
+        }
+
+        return {
+          id:          u.id,
+          name:        u.name  ?? "–",
+          email:       u.email ?? "–",
+          phone:       u.phone ?? "–",
+          role:        "Sales",
+          color:       COLORS[i % COLORS.length],
+          target:      10,
+          closing,
+          followup,
+          leads_total: leadsTotal,
+          online:      false,
+          join:        null,
+          leads,
+          activity:    [],
+        };
+      })
+    );
 
     setSalesTeam(mapped);
 
@@ -769,11 +786,7 @@ export default function ManajemenSalesPage() {
 
   } catch (err) {
     console.error("ERROR fetchSales:", err);
-
-    alert(
-      "Gagal mengambil data sales.\n\n" +
-      "Cek console browser untuk detail error."
-    );
+    alert("Gagal mengambil data sales.\n\nCek console browser untuk detail error.");
   } finally {
     setLoading(false);
   }
