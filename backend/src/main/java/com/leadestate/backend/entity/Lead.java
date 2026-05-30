@@ -17,11 +17,13 @@ public class Lead {
     private String phone;
     private String email;
 
-    @Column(name = "property_id")
-    private Integer propertyId;
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    private Property property;
 
-    @Column(name = "sales_id")
-    private Integer salesId;
+    @ManyToOne
+    @JoinColumn(name = "sales_id")
+    private User sales;
 
     @ManyToOne
     @JoinColumn(name = "status_id")
@@ -36,7 +38,7 @@ public class Lead {
         this.status = newStatus;
     }
 
-    public void assignToSales(Integer newSalesId) {
-        this.salesId = newSalesId;
+    public void assignToSales(User newSales) {
+        this.sales = newSales;
     }
 }

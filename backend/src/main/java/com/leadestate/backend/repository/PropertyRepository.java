@@ -1,5 +1,10 @@
 package com.leadestate.backend.repository;
 
-public class PropertyRepository {
-    
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import com.leadestate.backend.entity.Property;
+
+@Repository
+public interface PropertyRepository extends JpaRepository<Property, Integer> {
+
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public interface LeadRepository extends JpaRepository<Lead, Integer> {
 
     // Filter lead berdasarkan ID sales
-    List<Lead> findBySalesId(int salesId);
+    List<Lead> findBySales_Id(Integer salesId);
 
     // Menghitung total semua lead
     long count();
@@ -44,11 +44,13 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     List<Object[]> countLeadsBySales();
 
     // Filter Leads
-    @Query("SELECT l FROM Lead l WHERE " +
-        "(:salesId IS NULL OR l.salesId = :salesId) AND " +
-        "(:propertyId IS NULL OR l.propertyId = :propertyId) AND " +
-        "(:start IS NULL OR l.createdAt >= :start) AND " +
-        "(:end IS NULL OR l.createdAt <= :end)")
+    @Query("""
+        SELECT l FROM Lead l WHERE
+        (:salesId IS NULL OR l.sales.id = :salesId) AND
+        (:propertyId IS NULL OR l.property.id = :propertyId) AND
+        (:start IS NULL OR l.createdAt >= :start) AND
+        (:end IS NULL OR l.createdAt <= :end)
+    """)
     List<Lead> filterLeads(
         Integer salesId,
         Integer propertyId,

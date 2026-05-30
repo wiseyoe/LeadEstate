@@ -359,6 +359,8 @@ export default function DataLead() {
 
       const data = await res.json();
 
+      console.log("LEADS DATA =", data);
+
       setLeads(Array.isArray(data) ? data.sort((a, b) => b.id - a.id) : []);
     } catch (err) {
       console.error("ERROR fetchLeads:", err);

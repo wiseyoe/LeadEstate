@@ -1,4 +1,7 @@
 package com.leadestate.backend.service;
+import com.leadestate.backend.entity.Property;
+import com.leadestate.backend.repository.PropertyRepository;
+import com.leadestate.backend.repository.UserRepository;
 
 import com.leadestate.backend.dto.LeadRequest;
 import com.leadestate.backend.dto.ReportResponse;
@@ -34,11 +37,17 @@ public class LeadService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private PropertyRepository propertyRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     public List<Lead> getLeadsByUser(User user) {
         if (user.isAdmin()) {
             return leadRepository.findAll();
         } else {
-            return leadRepository.findBySalesId(user.getId());
+            return leadRepository.findBySales_Id(user.getId());
         }
     }
 
@@ -60,13 +69,31 @@ public class LeadService {
             request.getEmail()
         );
 
-        lead.setPropertyId(
-            request.getPropertyId()
-        );
+        Property property =
+            propertyRepository
+                .findById(
+                    request.getPropertyId()
+                )
+                .orElseThrow(
+                    () -> new RuntimeException(
+                        "Property tidak ditemukan"
+                    )
+                );
 
-        lead.setSalesId(
-            request.getSalesId()
-        );
+        User sales =
+            userRepository
+                .findById(
+                    request.getSalesId()
+                )
+                .orElseThrow(
+                    () -> new RuntimeException(
+                        "Sales tidak ditemukan"
+                    )
+                );
+
+        lead.setProperty(property);
+
+        lead.setSales(sales);
 
         LeadStatus status =
             leadStatusRepository
@@ -181,7 +208,7 @@ public class LeadService {
         NotificationSetting setting =
                 notificationSettingRepository
                 .findByUserId(
-                        lead.getSalesId()
+                        lead.getSales().getId()
                 )
                 .orElse(null);
 
@@ -196,7 +223,7 @@ public class LeadService {
 
             notificationService
             .createNotification(
-                    lead.getSalesId(),
+                    lead.getSales().getId(),
                     "Status Lead",
                     "Status berubah menjadi "
                     + status.getStatusName()
@@ -222,7 +249,7 @@ public class LeadService {
 
             notificationService
             .createNotification(
-                    lead.getSalesId(),
+                    lead.getSales().getId(),
                     "Closing Berhasil",
                     "Deal lead "
                     + lead.getName()
@@ -244,8 +271,31 @@ public class LeadService {
         lead.setName(request.getName());
         lead.setPhone(request.getPhone());
         lead.setEmail(request.getEmail());
-        lead.setPropertyId(request.getPropertyId());
-        lead.setSalesId(request.getSalesId());
+        Property property =
+            propertyRepository
+                .findById(
+                    request.getPropertyId()
+                )
+                .orElseThrow(
+                    () -> new RuntimeException(
+                        "Property tidak ditemukan"
+                    )
+                );
+
+        User sales =
+            userRepository
+                .findById(
+                    request.getSalesId()
+                )
+                .orElseThrow(
+                    () -> new RuntimeException(
+                        "Sales tidak ditemukan"
+                    )
+                );
+
+        lead.setProperty(property);
+
+        lead.setSales(sales);
         lead.setSource(request.getSource());
 
         // update status
