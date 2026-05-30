@@ -38,4 +38,13 @@ public class FollowUpController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+
+    @GetMapping("/lead/{leadId}")
+    public ResponseEntity<?> getByLead(
+            @PathVariable Long leadId
+    ){
+        return ResponseEntity.ok(
+            followUpService.getByLeadId(leadId)
+        );
+    }
 }

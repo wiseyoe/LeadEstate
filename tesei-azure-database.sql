@@ -260,7 +260,7 @@ CREATE TABLE `reminders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `followup_id` int(11) NOT NULL,
   `reminder_date` datetime DEFAULT NULL,
-  `status` enum('pending','done') DEFAULT 'pending',
+  `is_sent` BOOLEAN DEFAULT FALSE,
   
   PRIMARY KEY (`id`),
   KEY `followup_id` (`followup_id`),
@@ -272,12 +272,12 @@ CREATE TABLE `reminders` (
 -- Dumping data for table `reminders`
 --
 
-INSERT INTO `reminders` (`id`, `followup_id`, `reminder_date`, `status`) VALUES
-(1, 1, '2026-04-07 14:08:37', 'pending'),
-(2, 2, '2026-04-05 14:08:37', 'done'),
-(3, 3, '2026-04-11 14:08:37', 'pending'),
-(4, 4, '2026-04-04 14:08:37', 'pending'),
-(5, 5, '2026-04-09 14:08:37', 'pending');
+INSERT INTO `reminders` (`id`, `followup_id`, `reminder_date`, `is_sent`) VALUES
+(1, 1, '2026-04-07 14:08:37', FALSE),
+(2, 2, '2026-04-05 14:08:37', FALSE),
+(3, 3, '2026-04-11 14:08:37', TRUE),
+(4, 4, '2026-04-04 14:08:37', FALSE),
+(5, 5, '2026-04-09 14:08:37', TRUE);
 
 
 -- --------------------------------------------------------
@@ -315,7 +315,29 @@ INSERT INTO `role_permission` (`role_id`, `perm_id`) VALUES
 (3, 1),
 (3, 2);
 
+CREATE TABLE notifications (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE TABLE notification_settings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    followup_app TINYINT(1) DEFAULT 0,
+    followup_wa TINYINT(1) DEFAULT 0,
+    lead_app TINYINT(1) DEFAULT 0,
+    lead_wa TINYINT(1) DEFAULT 0,
+    status_app TINYINT(1) DEFAULT 0,
+    status_wa TINYINT(1) DEFAULT 0,
+    closing_app TINYINT(1) DEFAULT 0,
+    closing_wa TINYINT(1) DEFAULT 0,
+    system_app TINYINT(1) DEFAULT 0,
+    system_wa TINYINT(1) DEFAULT 0
+);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

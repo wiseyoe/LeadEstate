@@ -26,13 +26,14 @@ public class DashboardController {
      */
     @GetMapping
     public ResponseEntity<?> getDashboard(
-            @RequestHeader("Role") String role
+            @RequestHeader("Role") String role,
+            @RequestHeader("User-Id") Integer userId
     ) {
 
         authService.checkSalesOrAdmin(role);
 
         return ResponseEntity.ok(
-                dashboardService.getDashboardData()
+                dashboardService.getDashboardData(role, userId)
         );
     }
 

@@ -14,6 +14,8 @@ apiClient.interceptors.request.use((config) => {
       const parsedUser = JSON.parse(user);
 
       config.headers.Role = parsedUser.role;
+      config.headers["User-Id"] = parsedUser.id;
+      
     } catch (e) {
       console.error("Failed parsing user");
     }
@@ -77,25 +79,18 @@ export const saveNotifSettings = async (
   return res.data;
 };
 
-export const getNotifications =
-async (userId)=>{
+export const getNotifications = async (userId) => {
+  const res = await apiClient.get(
+    `/notifications/${userId}`
+  );
 
-const res =
-await axios.get(
-`${API_URL}/notifications/${userId}`
-);
-
-return res.data;
-
+  return res.data;
 };
 
-export const readNotification =
-async(id)=>{
-
-await axios.put(
-`${API_URL}/notifications/${id}/read`
-);
-
+export const readNotification = async (id) => {
+  await apiClient.put(
+    `/notifications/${id}/read`
+  );
 };
 
 export default apiClient;

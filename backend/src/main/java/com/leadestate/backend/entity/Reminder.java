@@ -11,26 +11,53 @@ public class Reminder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "followup_id", nullable = false)
-    private Long followupId;
+    @OneToOne
+    @JoinColumn(
+        name = "followup_id",
+        nullable = false,
+        unique = true
+    )
+    private FollowUp followUp;
 
     @Column(name = "reminder_date")
     private LocalDateTime reminderDate;
 
-    @Column(name = "status")
-    private String status = "pending";
+    @Column(name = "is_sent")
+    private Boolean isSent = false;
 
     // ===== Getter & Setter =====
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getFollowupId() { return followupId; }
-    public void setFollowupId(Long followupId) { this.followupId = followupId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getReminderDate() { return reminderDate; }
-    public void setReminderDate(LocalDateTime reminderDate) { this.reminderDate = reminderDate; }
+    public FollowUp getFollowUp() {
+        return followUp;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setFollowUp(FollowUp followUp) {
+        this.followUp = followUp;
+    }
+
+    public LocalDateTime getReminderDate() {
+        return reminderDate;
+    }
+
+    public void setReminderDate(
+            LocalDateTime reminderDate
+    ) {
+        this.reminderDate = reminderDate;
+    }
+
+    public Boolean getIsSent() {
+        return isSent;
+    }
+
+    public void setIsSent(Boolean isSent) {
+        this.isSent = isSent;
+    }
 }

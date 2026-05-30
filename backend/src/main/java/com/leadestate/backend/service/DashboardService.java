@@ -27,7 +27,7 @@ public class DashboardService {
     @Autowired
     private ReminderRepository reminderRepository;
 
-    public DashboardResponse getDashboardData() {
+    public DashboardResponse getDashboardData(String role, Integer userId) {
         // 1. Hitung data statistik utama dari Database
         long totalLeads = leadRepository.count();
 
@@ -36,8 +36,8 @@ public class DashboardService {
         long doneFollowUps = followUpRepository.countByStatus("done");
         long cancelledFollowUps = followUpRepository.countByStatus("cancelled");
 
-        long pendingReminders = reminderRepository.countByStatus("pending");
-        long doneReminders = reminderRepository.countByStatus("done");
+        long pendingReminders = pendingFollowUps;
+        long doneReminders = doneFollowUps;
 
         long closedLeads = leadRepository.countByStatus_Id(5); // status 5 = Closed
         long activeLeads = totalLeads - closedLeads;
@@ -98,7 +98,11 @@ public class DashboardService {
         for (Object[] row : salesResults) {
             String name = (String) row[0];
             long closing = ((Number) row[1]).longValue();
-            String initials = name.substring(0, 1).toUpperCase();
+            String initials = (
+                name != null && !name.isBlank()
+            )
+            ? name.substring(0,1).toUpperCase()
+            : "?";
 
             topSales.add(new TopSalesResponse(
                 name,
@@ -112,7 +116,15 @@ public class DashboardService {
         response.setTopSales(topSales);
 
         // ================= REMINDERS =================
-        List<Object[]> reminderResults = reminderRepository.getTodayReminders();
+        List<Object[]> reminderResults;
+        if ("admin".equalsIgnoreCase(role)) {
+            reminderResults =
+                    reminderRepository.getTodayReminders();
+        } else {
+            reminderResults =
+                    reminderRepository.getTodayRemindersBySales(userId);
+        }
+
         List<ReminderResponse> reminders = new ArrayList<>();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -121,28 +133,45 @@ public class DashboardService {
             String leadName = (String) row[0];
             String propertyName = (String) row[1];
             
-            java.time.LocalDateTime followupDate = 
-                ((java.sql.Timestamp) row[2]).toLocalDateTime();
+            java.time.LocalDateTime followupDate = null;
+            if (row[2] != null) {
+                if (row[2] instanceof java.sql.Timestamp ts) {
+                    followupDate = ts.toLocalDateTime();
+                } else {
+                    followupDate = (java.time.LocalDateTime) row[2];
+                }
+            }
 
             String status = (String) row[3];
 
             reminders.add(new ReminderResponse(
                 leadName,
-                leadName.substring(0, 1).toUpperCase(),
-                "🏠 " + propertyName,
+                (
+                    leadName != null &&
+                    !leadName.isBlank()
+                )
+                ? leadName.substring(0,1).toUpperCase()
+                : "?",
+                "🏠 " + (
+                    propertyName != null
+                    ? propertyName
+                    : "Tanpa Property"
+                ),
                 "H+1",
-                followupDate.format(formatter),
-                status.equals("done") ? "today" : "soon",
+                followupDate != null
+                    ? followupDate.format(formatter)
+                    : "-",
+                "done".equalsIgnoreCase(status) ? "today" : "soon",
                 "#f59e0b"
             ));
         }
         response.setReminders(reminders);
 
         // FOLLOW UP HARI INI
-        response.setTodayFollowups(pendingFollowUps);
+        response.setTodayFollowups(pendingReminders);
 
         // LEAD TERTUNDA
-        response.setPendingLeads(pendingFollowUps);
+        response.setPendingLeads(pendingReminders);
 
         // CLOSING BULAN INI
         response.setMonthlyClosing(closedLeads);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/ReminderPage.css";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/leadestate-logo.png";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -15,34 +16,34 @@ const TEMPLATES = {
 };
 
 const FILTER_TABS = [
-  { key: "semua", label: "Semua" },
+  { key: "semua",    label: "Semua"    },
   { key: "hari-ini", label: "Hari Ini" },
   { key: "tertunda", label: "Tertunda" },
-  { key: "selesai", label: "Selesai" },
+  { key: "selesai",  label: "Selesai"  },
 ];
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function getTagClass(tag) {
   if (tag === "today") return "h-today";
-  if (tag === "soon") return "h-soon";
-  if (tag === "late") return "h-late";
+  if (tag === "soon")  return "h-soon";
+  if (tag === "late")  return "h-late";
   return "h-done";
 }
 
 function getStatusPill(s) {
-  if (s === "belum") return "sp-belum";
+  if (s === "belum")  return "sp-belum";
   if (s === "proses") return "sp-proses";
   return "sp-selesai";
 }
 
 function getStatusLabel(s) {
-  if (s === "belum") return "Belum Direspons";
+  if (s === "belum")  return "Belum Direspons";
   if (s === "proses") return "Sedang Diproses";
   return "Selesai";
 }
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
-function Sidebar() {
+function Sidebar({ todayFollowups }) {
   const navigate = useNavigate();
 
   const currentUser = (() => {
@@ -53,110 +54,125 @@ function Sidebar() {
     }
   })();
 
-  // ⬇️ TAMBAHAN
-  const isAdmin =
-    currentUser?.role?.toLowerCase() === "admin";
+  const isAdmin = currentUser?.role?.toLowerCase() === "admin";
 
   const userInitials = (currentUser.name || "U")
     .split(" ")
-    .slice(0,2)
-    .map(w=>w[0])
+    .slice(0, 2)
+    .map((w) => w[0])
     .join("")
     .toUpperCase();
 
   const userRole =
-    currentUser.role === "Admin"
-      ? "Administrator"
-      : currentUser.role === "Supervisor"
-      ? "Supervisor"
-      : currentUser.role === "Sales"
-      ? "Sales"
-      : currentUser.role || "Administrator";
+    currentUser.role === "Admin"       ? "Administrator" :
+    currentUser.role === "Supervisor"  ? "Supervisor"    :
+    currentUser.role === "Sales"       ? "Sales"         :
+    currentUser.role || "Administrator";
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <div className="brand-icon">L</div>
-        <div className="brand-name">
+    <aside className="le-sidebar">
+      <div className="le-brand">
+        <img src={logo} alt="LeadEstate Logo" className="brand-logo" />
+        <div className="le-brand-name">
           Lead<span>Estate</span>
         </div>
       </div>
 
-      <nav className="nav">
-        <div className="nav-label">Menu Utama</div>
+      <nav className="le-nav">
+        <div className="le-nav-label">Menu Utama</div>
 
         <div
-          className="nav-item"
+          className="le-nav-item"
           onClick={() => navigate("/dashboard")}
         >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-          </svg>
+          <span className="le-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </span>
           Dashboard
         </div>
 
-        <div className="nav-item active">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-          </svg>
-          Reminder &amp; Follow Up
-          <span className="nav-badge">5</span>
+        <div className="le-nav-item active">
+          <span className="le-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10,8 16,12 10,16" fill="currentColor" />
+            </svg>
+          </span>
+          Reminder &amp; Follow-Up
+          <span className="le-nav-badge">{todayFollowups}</span>
         </div>
 
         <div
-          className="nav-item"
+          className="le-nav-item"
           onClick={() => navigate("/dataLeads")}
         >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-          </svg>
+          <span className="le-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+            </svg>
+          </span>
           Data Lead
         </div>
 
-        {/* ⬇️ KHUSUS ADMIN */}
         {isAdmin && (
           <>
             <div
-              className="nav-item"
+              className="le-nav-item"
               onClick={() => navigate("/Manajemen_sales")}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
-              </svg>
+              <span className="le-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="2" y="3" width="20" height="18" rx="2" />
+                  <circle cx="12" cy="10" r="3" />
+                  <path d="M7 21v-1a5 5 0 0 1 10 0v1" />
+                </svg>
+              </span>
               Manajemen Sales
             </div>
 
-            <div className="nav-label">Laporan</div>
+            <div className="le-nav-label">Laporan</div>
 
             <div
-              className="nav-item"
+              className="le-nav-item"
               onClick={() => navigate("/laporan")}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-              </svg>
+              <span className="le-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6"  y1="20" x2="6"  y2="14" />
+                </svg>
+              </span>
               Laporan &amp; Statistik
             </div>
           </>
         )}
 
         <div
-          className="nav-item"
-          style={{ marginTop: 8 }}
+          className="le-nav-item"
           onClick={() => navigate("/settings")}
         >
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-          </svg>
+          <span className="le-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            </svg>
+          </span>
           Pengaturan
         </div>
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="avatar">{userInitials}</div>
-        <div className="user-info">
-          <div className="name">{currentUser.name || "User"}</div>
-          <div className="role">{userRole}</div>
+      <div className="le-sidebar-footer">
+        <div className="le-avatar">{userInitials}</div>
+        <div>
+          <div className="le-user-name">{currentUser.name || "User"}</div>
+          <div className="le-user-role">{userRole}</div>
         </div>
       </div>
     </aside>
@@ -200,7 +216,12 @@ function ContactCard({ lead }) {
           <div className="contact-actions" style={{ marginTop: 8 }}>
             <button
               className="ca-btn wa"
-              onClick={() => alert(`Buka WhatsApp untuk ${lead.name}`)}
+              onClick={() =>
+                window.open(
+                  `https://wa.me/${lead.phone.replace(/\D/g, "")}`,
+                  "_blank"
+                )
+              }
             >
               💬 WhatsApp
             </button>
@@ -216,9 +237,7 @@ function ContactCard({ lead }) {
           <div className={`status-pill ${getStatusPill(lead.status)}`}>
             {getStatusLabel(lead.status)}
           </div>
-          <div
-            style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}
-          >
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
             Sales: {lead.sales}
           </div>
         </div>
@@ -239,9 +258,7 @@ function ContactCard({ lead }) {
         </div>
         <div className="info-item">
           <div className="info-label">Jadwal Reminder</div>
-          <div className="info-val">
-            {lead.hday} · Hari ini {lead.time}
-          </div>
+          <div className="info-val">{lead.hday} · Hari ini {lead.time}</div>
         </div>
       </div>
     </div>
@@ -259,9 +276,7 @@ function HistoryTimeline({ history = [] }) {
             <div className="tl-line">
               <div
                 className="tl-dot"
-                style={{
-                  background: h.done ? "var(--success)" : "var(--brand-gold)",
-                }}
+                style={{ background: h.done ? "var(--success)" : "var(--brand-gold)" }}
               />
               {i < history.length - 1 && (
                 <div className={`tl-seg ${h.done ? "done" : "current"}`} />
@@ -292,8 +307,14 @@ function ActionCard({ lead, onTandaiSelesai, onCatatAktivitas }) {
       alert("Pilih template terlebih dahulu");
       return;
     }
-    alert(
-      `✅ Pesan WhatsApp dikirim ke ${lead.name}\n\n"${preview.substring(0, 80)}..."`,
+
+    const cleanPhone = lead.phone.replace(/\D/g, "");
+
+    const encodedMessage = encodeURIComponent(preview);
+
+    window.open(
+      `https://wa.me/${cleanPhone}?text=${encodedMessage}`,
+      "_blank"
     );
   }
 
@@ -324,11 +345,7 @@ function ActionCard({ lead, onTandaiSelesai, onCatatAktivitas }) {
           ))}
         </div>
         <div className="wa-preview">{preview}</div>
-        <button
-          className="send-btn"
-          style={{ marginTop: 10 }}
-          onClick={handleSendWA}
-        >
+        <button className="send-btn" style={{ marginTop: 10 }} onClick={handleSendWA}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
           </svg>
@@ -391,10 +408,11 @@ function DetailPanel({ lead, onTandaiSelesai, onCatatAktivitas }) {
 
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function ReminderPage() {
-  const [leads, setLeads] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [leads, setLeads]             = useState([]);
+  const [todayFollowups, setTodayFollowups] = useState(0);
+  const [selectedId, setSelectedId]   = useState(null);
   const [activeFilter, setActiveFilter] = useState("semua");
-  const [searchQ, setSearchQ] = useState("");
+  const [searchQ, setSearchQ]         = useState("");
 
   useEffect(() => {
     fetchLeads();
@@ -404,86 +422,101 @@ export default function ReminderPage() {
     try {
       console.log("API URL:", API);
 
-      // Ambil userId dari localStorage (disimpan saat login)
-      const userId = localStorage.getItem("userId");
-      const token  = localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
-      // Pakai /raw jika tidak ada userId, atau pakai ?userId= jika ada
-      const url = userId
-        ? `${API}/api/leads?userId=${userId}`
-        : `${API}/api/leads/raw`;
-
-      const res = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const user = JSON.parse(localStorage.getItem("user"));
+      const res = await fetch(
+        `${API}/api/reminders?userId=${user.id}&role=${user.role}`
+      );
 
       console.log("STATUS:", res.status);
 
-      const data = await res.json();
+      const json = await res.json();
+      console.log("DATA DARI API:", json);
 
-      console.log("DATA DARI API:", data);
+      const reminders = json.data;
 
-      const mapped = data.map((item, index) => {
-        const statusName =
-          item.status?.statusName || item.status?.status_name || "";
+      setTodayFollowups(
+        reminders.filter(
+          r => r.status?.toLowerCase() !== "done"
+        ).length
+      );
 
+      const mapped = reminders.map((item, index) => {
+        const reminderStatus = item.status?.toLowerCase();
+        
+        // --- LOGIKA IMPLEMENTASI TAG BARU (TODAY, LATE, SOON) ---
+        const reminderDate = new Date(item.reminderDate);
+        const now = new Date();
         let tag = "soon";
 
-        if (statusName.toLowerCase().includes("closed")) {
+        if (reminderStatus === "done") {
           tag = "done";
-        } else if (statusName.toLowerCase().includes("follow")) {
-          tag = "today";
+        } else {
+          const diffMs = reminderDate - now;
+          const diffHours = diffMs / (1000 * 60 * 60);
+
+          if (diffHours < 0) {
+            tag = "late";
+          } else if (diffHours <= 24) {
+            tag = "today";
+          } else {
+            tag = "soon";
+          }
         }
+
+        const leadId = item.leadId;
+        const leadName = item.leadName;
+        const phone = item.phone;
+        const propertyName = item.propertyName;
+        const salesName = item.salesName;
+        const source = item.source;
+
+        // Penentuan teks label berdasarkan tag
+        let hdayLabel = "Segera";
+        if (tag === "today") hdayLabel = "Hari ini";
+        if (tag === "late") hdayLabel = "Tertunda";
+        if (tag === "done") hdayLabel = "Selesai";
 
         return {
           id: item.id,
-          name: item.name,
-          phone: item.phone || "-",
-
-          prop: item.property?.name || "Properti",
-
-          sales: item.sales?.name || "Sales",
-
-          source: item.source || "-",
-
+          leadId,
+          name: leadName || "Unknown",
+          phone: phone || "-",
+          prop: propertyName || "Properti",
+          sales: salesName || "Sales",
+          source: source || "-",
           budget: "Rp -",
-
-          initials: item.name
-            ?.split(" ")
+          initials: (leadName || "U")
+            .split(" ")
             .map((n) => n[0])
             .join("")
             .substring(0, 2)
             .toUpperCase(),
-
-          color: ["#f59e0b", "#6366f1", "#10b981", "#ef4444", "#8b5cf6"][
-            index % 5
-          ],
-
+          color: [
+            "#f59e0b",
+            "#6366f1",
+            "#10b981",
+            "#ef4444",
+            "#8b5cf6",
+          ][index % 5],
           tag,
-
-          hday:
-            tag === "today"
-              ? "Hari ini"
-              : tag === "done"
-                ? "Selesai"
-                : "Segera",
-
-          time: "10:00",
-
-          status: tag === "done" ? "selesai" : "proses",
-
-          history: [
-            {
-              date: "Hari ini",
-              note: "Lead berhasil dimuat dari database",
-              done: true,
-            },
-          ],
+          hday: hdayLabel,
+          time: new Date(item.reminderDate).toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          status:
+            reminderStatus === "done"
+              ? "selesai"
+              : tag === "late"
+              ? "belum"
+              : "proses",
+          history: [],
         };
       });
 
       console.log("HASIL MAPPING:", mapped);
-
       setLeads(mapped);
 
       if (mapped.length > 0) {
@@ -496,10 +529,10 @@ export default function ReminderPage() {
 
   const filtered = leads.filter((l) => {
     const matchFilter =
-      activeFilter === "semua" ||
+      activeFilter === "semua"    ||
       (activeFilter === "hari-ini" && l.tag === "today") ||
-      (activeFilter === "tertunda" && l.tag === "late") ||
-      (activeFilter === "selesai" && l.tag === "done");
+      (activeFilter === "tertunda" && l.tag === "late")  ||
+      (activeFilter === "selesai"  && l.tag === "done");
     const q = searchQ.toLowerCase();
     const matchSearch =
       l.name.toLowerCase().includes(q) ||
@@ -512,13 +545,12 @@ export default function ReminderPage() {
   async function handleTandaiSelesai() {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${API}/api/leads/${selectedId}/status`, {
+      await fetch(`${API}/api/reminders/${selectedId}/done`, {
         method: "PUT",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ statusId: 5 })
       });
       fetchLeads();
     } catch (err) {
@@ -529,13 +561,20 @@ export default function ReminderPage() {
   async function handleCatatAktivitas(notes) {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${API}/followups`, {
+      const user = JSON.parse(localStorage.getItem("user"));
+      await fetch(`${API}/api/followups`, {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ leadId: selectedId, notes }),
+        body: JSON.stringify({
+          leadId: selectedLead?.leadId,
+          salesId: user?.id,
+          notes,
+          followupDate: new Date(),
+          status: "pending",
+        }),
       });
       fetchLeads();
       alert("✅ Aktivitas berhasil dicatat!");
@@ -545,15 +584,15 @@ export default function ReminderPage() {
   }
 
   return (
-    <div className="page-root">
-      <Sidebar />
+    <div className="le-root">
+      <Sidebar todayFollowups={todayFollowups} />
 
-      <main className="main">
+      <main className="le-main">
         {/* TOPBAR */}
-        <div className="topbar">
-          <div className="topbar-title">Reminder &amp; Follow Up</div>
-          <div className="topbar-right">
-            <div className="date-chip">
+        <div className="le-topbar">
+          <div className="le-topbar-title">Reminder &amp; Follow Up</div>
+          <div className="le-topbar-right">
+            <div className="le-date-chip">
               📅{" "}
               {new Date().toLocaleDateString("id-ID", {
                 weekday: "long",
@@ -562,11 +601,11 @@ export default function ReminderPage() {
                 year: "numeric",
               })}
             </div>
-            <div className="notif-btn">
+            <div className="le-notif-btn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#6b7280">
                 <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
               </svg>
-              <div className="notif-dot" />
+              <div className="le-notif-dot" />
             </div>
           </div>
         </div>

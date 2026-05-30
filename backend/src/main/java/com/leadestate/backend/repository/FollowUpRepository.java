@@ -16,4 +16,8 @@ public interface FollowUpRepository extends JpaRepository<FollowUp, Long> {
 
     @Query("SELECT f.status, COUNT(f) FROM FollowUp f GROUP BY f.status")
     List<Object[]> countFollowUpGroupByStatus();
+
+    List<FollowUp> findByLeadIdOrderByCreatedAtDesc(
+            Long leadId
+    );
 }

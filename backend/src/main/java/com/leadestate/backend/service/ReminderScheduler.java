@@ -1,6 +1,5 @@
 package com.leadestate.backend.service;
 
-import com.leadestate.backend.entity.Reminder;
 import com.leadestate.backend.repository.ReminderRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +43,8 @@ public class ReminderScheduler {
                                     + leadName
                     );
 
-            Reminder reminder =
-                    reminderRepository
-                    .findById(reminderId)
-                    .orElse(null);
-
-            if(reminder != null){
-
-                reminder.setStatus(
-                        "sent"
-                );
-
-                reminderRepository.save(
-                        reminder
-                );
-            }
+            // ✅ tandai sudah dikirim
+            reminderRepository.markAsSent(reminderId);
         }
     }
 }
