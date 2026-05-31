@@ -66,25 +66,30 @@ public class ReminderService {
         Reminder reminder = reminderRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Reminder tidak ditemukan"));
 
-    if (!"Admin".equalsIgnoreCase(role)) {
+        if (!"Admin".equalsIgnoreCase(role)) {
 
-        Integer ownerSalesId =
-            reminderRepository
-            .getSalesIdByReminderId(id);
+            Integer ownerSalesId =
+                reminderRepository
+                .getSalesIdByReminderId(id);
 
-        if (!ownerSalesId.equals(userId)) {
+            if (!ownerSalesId.equals(userId)) {
 
-            throw new RuntimeException(
-                "Akses ditolak. Reminder bukan milik Anda."
-            );
+                throw new RuntimeException(
+                    "Akses ditolak. Reminder bukan milik Anda."
+                );
+            }
         }
-    }
 
         FollowUp followUp =
             reminder.getFollowUp();
 
+        // ── FORCE UPDATE STATUS FOLLOWUP & REMINDER ──────────────────────────
         followUp.setStatus("done");
-
         followUpRepository.save(followUp);
+
+        // Update status reminder agar sinkronisasi data bersih
+        reminder.setIsSent(true);
+        reminderRepository.save(reminder);
+        // ─────────────────────────────────────────────────────────────────────
     }
 }

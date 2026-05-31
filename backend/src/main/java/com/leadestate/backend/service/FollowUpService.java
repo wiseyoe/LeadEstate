@@ -3,13 +3,11 @@ package com.leadestate.backend.service;
 import com.leadestate.backend.dto.FollowUpRequest;
 import com.leadestate.backend.entity.FollowUp;
 import com.leadestate.backend.entity.NotificationSetting;
-import com.leadestate.backend.entity.Reminder;
 import com.leadestate.backend.entity.Lead;
 
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
 import com.leadestate.backend.repository.NotificationSettingRepository;
-import com.leadestate.backend.repository.ReminderRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,17 +29,14 @@ public class FollowUpService {
     @Autowired
     private LeadRepository leadRepository;
 
-    @Autowired
-    private ReminderRepository reminderRepository;
-
     public List<FollowUp> getByLeadId(Long leadId) {
         return followUpRepository.findByLeadIdOrderByCreatedAtDesc(leadId);
     }
 
-    // FR 8 - Create FollowUp
+    // FR 8 - Create / Update FollowUp (Upsert State)
     public FollowUp createFollowUp(FollowUpRequest request) {
 
-        // ── VALIDASI WAJIB ───────────────────────────────────────────────────
+        // ── 1. VALIDASI WAJIB INDEPENDEN ─────────────────────────────────────
         if (request.getFollowupDate() == null) {
             throw new RuntimeException("Tanggal follow up wajib diisi");
         }
@@ -54,45 +49,66 @@ public class FollowUpService {
             throw new RuntimeException("Lead wajib diisi");
         }
 
-        // ── MAPPING ENTITY ───────────────────────────────────────────────────
+        // ── 2. CEK & UPDATE JIKA ADA FOLLOW-UP AKTIF ─────────────────────────
+        List<FollowUp> existing =
+            followUpRepository.findByLeadIdOrderByCreatedAtDesc(request.getLeadId());
+
+        FollowUp saved;
+
+        if (!existing.isEmpty()) {
+            FollowUp last = existing.get(0);
+
+            if (!"done".equalsIgnoreCase(last.getStatus())) {
+                // 🔥 UPDATE existing (BUKAN bikin baru)
+                last.setNotes(request.getNotes());
+                last.setFollowupDate(request.getFollowupDate());
+                
+                String status = request.getStatus();
+                if ("done".equalsIgnoreCase(status)) {
+                    last.setStatus("done");
+                } else {
+                    last.setStatus("pending");
+                }
+
+                saved = followUpRepository.save(last);
+                
+                // Trigger notifikasi sebelum return early
+                triggerNotification(request);
+                return saved;
+            }
+        }
+
+        // ── 3. JIKA TIDAK ADA YANG AKTIF → BUAT BARU ─────────────────────────
         FollowUp followUp = new FollowUp();
         followUp.setLeadId(request.getLeadId());
         followUp.setSalesId(request.getSalesId());
         followUp.setNotes(request.getNotes());
         followUp.setFollowupDate(request.getFollowupDate());
-
-        // Logika Status: menentukan alur proses bisnis (pending / done / cancelled)
+        
         if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
             followUp.setStatus(request.getStatus());
         } else {
             followUp.setStatus("pending");
         }
 
-        if (request.getFollowupDate() == null) {
-                throw new RuntimeException("Tanggal follow up wajib diisi");
-        }
+        saved = followUpRepository.save(followUp);
 
-        // SAVE FOLLOWUP
-        FollowUp saved = followUpRepository.save(followUp);
+        // Trigger notifikasi untuk data baru
+        triggerNotification(request);
 
-        // ── OTOMATISASI REMINDER ─────────────────────────────────────────────
-        Reminder reminder = new Reminder();
-        reminder.setFollowUp(saved);
-        reminder.setReminderDate(saved.getFollowupDate());
-        reminder.setIsSent(false);
-        reminderRepository.save(reminder);
+        return saved;
+    }
 
-        // ── AMBIL DATA LEAD UNTUK NOTIFIKASI ─────────────────────────────────
+    // ── PRIVATE HELPER UNTUK NOTIFIKASI ──────────────────────────────────────
+    private void triggerNotification(FollowUpRequest request) {
         Lead lead = leadRepository.findById(request.getLeadId().intValue())
                 .orElse(null);
 
         String leadName = (lead != null) ? lead.getName() : "Unknown Lead";
 
-        // CEK SETTING NOTIFIKASI SALES
         NotificationSetting setting = settingRepo.findByUserId(request.getSalesId().intValue())
                 .orElse(null);
 
-        // KIRIM IN-APP NOTIFICATION JIKA AKTIF
         if (setting != null && Boolean.TRUE.equals(setting.getFollowupApp())) {
             notificationService.createNotification(
                     request.getSalesId().intValue(),
@@ -100,7 +116,5 @@ public class FollowUpService {
                     "Lead " + leadName + " masuk ke reminder follow up"
             );
         }
-
-        return saved;
     }
 }

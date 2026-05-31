@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import "../styles/dataLead.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import logo from "../assets/leadestate-logo.png";
 
@@ -215,6 +215,17 @@ function LeadModal({ isOpen, editData, onClose, onSave }) {
     }
   }, [editData, isOpen]);
 
+  useEffect(() => {
+    if (location.state) {
+      setForm((prev) => ({
+        ...prev,
+        leadId: location.state.leadId,
+        leadName: location.state.leadName,
+        phone: location.state.phone,
+      }));
+    }
+  }, [location.state]);
+
   if (!isOpen) return null;
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -325,6 +336,8 @@ function DetailModal({ lead, onClose }) {
 
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function DataLead() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [leads,       setLeads]       = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [searchQ,     setSearchQ]     = useState("");
@@ -789,6 +802,28 @@ export default function DataLead() {
                                       <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                                     </svg>
                                   </button>
+                                  <button
+                                  className="ic-btn followup"
+                                  title="Jadwalkan Follow Up"
+                                  onClick={() => {
+                                    navigate("/reminder", {
+                                      state: {
+                                        leadId: l.id,
+                                        leadName: l.name,
+                                        phone: l.phone,
+                                      },
+                                    });
+                                  }}
+                                >
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 11h5v-2h-4V6h-2v7z"/>
+                                  </svg>
+                                </button>
                                   <button
                                     className="ic-btn edit"
                                     title="Edit Status"

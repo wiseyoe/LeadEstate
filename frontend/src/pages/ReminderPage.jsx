@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "../styles/ReminderPage.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/leadestate-logo.png";
 
 const API = import.meta.env.VITE_API_URL;
@@ -309,7 +309,6 @@ function ActionCard({ lead, onTandaiSelesai, onCatatAktivitas }) {
     }
 
     const cleanPhone = lead.phone.replace(/\D/g, "");
-
     const encodedMessage = encodeURIComponent(preview);
 
     window.open(
@@ -411,8 +410,14 @@ export default function ReminderPage() {
   const [leads, setLeads]             = useState([]);
   const [todayFollowups, setTodayFollowups] = useState(0);
   const [selectedId, setSelectedId]   = useState(null);
+  const [followupHistory, setFollowupHistory] = useState([]);
   const [activeFilter, setActiveFilter] = useState("semua");
   const [searchQ, setSearchQ]         = useState("");
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log("STATE:", location.state);
+  }, []);
 
   useEffect(() => {
     fetchLeads();
@@ -423,7 +428,6 @@ export default function ReminderPage() {
       console.log("API URL:", API);
 
       const token = localStorage.getItem("token");
-
       const user = JSON.parse(localStorage.getItem("user"));
       const res = await fetch(
         `${API}/api/reminders?userId=${user.id}&role=${user.role}`
@@ -434,7 +438,20 @@ export default function ReminderPage() {
       const json = await res.json();
       console.log("DATA DARI API:", json);
 
-      const reminders = json.data;
+      // ── FIX DEDUP (Diurutkan dari paling baru agar tidak tertimpa entri lama) ──
+      const rawReminders = json.data;
+      const uniqueMap = new Map();
+
+      rawReminders
+        .sort((a, b) => new Date(b.reminderDate) - new Date(a.reminderDate))
+        .forEach(r => {
+          if (!uniqueMap.has(r.leadId)) {
+            uniqueMap.set(r.leadId, r);
+          }
+        });
+
+      const reminders = Array.from(uniqueMap.values());
+      // ─────────────────────────────────────────────────────────────────────
 
       setTodayFollowups(
         reminders.filter(
@@ -443,27 +460,22 @@ export default function ReminderPage() {
       );
 
       const mapped = reminders.map((item, index) => {
+        // ── FORCE STATUS DONE DI UI ──────────────────────────────────────────
         const reminderStatus = item.status?.toLowerCase();
-        
-        // --- LOGIKA IMPLEMENTASI TAG BARU (TODAY, LATE, SOON) ---
-        const reminderDate = new Date(item.reminderDate);
-        const now = new Date();
         let tag = "soon";
 
         if (reminderStatus === "done") {
           tag = "done";
         } else {
-          const diffMs = reminderDate - now;
-          const diffHours = diffMs / (1000 * 60 * 60);
+          const reminderDate = new Date(item.reminderDate);
+          const now = new Date();
+          const diffHours = (reminderDate - now) / (1000 * 60 * 60);
 
-          if (diffHours < 0) {
-            tag = "late";
-          } else if (diffHours <= 24) {
-            tag = "today";
-          } else {
-            tag = "soon";
-          }
+          if (diffHours < 0) tag = "late";
+          else if (diffHours <= 24) tag = "today";
+          else tag = "soon";
         }
+        // ─────────────────────────────────────────────────────────────────────
 
         const leadId = item.leadId;
         const leadName = item.leadName;
@@ -472,7 +484,6 @@ export default function ReminderPage() {
         const salesName = item.salesName;
         const source = item.source;
 
-        // Penentuan teks label berdasarkan tag
         let hdayLabel = "Segera";
         if (tag === "today") hdayLabel = "Hari ini";
         if (tag === "late") hdayLabel = "Tertunda";
@@ -527,6 +538,27 @@ export default function ReminderPage() {
     }
   }
 
+  async function fetchFollowupHistory(leadId) {
+    try {
+      const res = await fetch(
+        `${API}/followups/lead/${leadId}`
+      );
+
+      const data = await res.json();
+
+      const mappedHistory = data.map((f) => ({
+        date: new Date(f.createdAt).toLocaleString("id-ID"),
+        note: f.notes,
+        done: f.status?.toLowerCase() === "done",
+      }));
+
+      setFollowupHistory(mappedHistory);
+    } catch (err) {
+      console.error("Gagal ambil history:", err);
+      setFollowupHistory([]);
+    }
+  }
+
   const filtered = leads.filter((l) => {
     const matchFilter =
       activeFilter === "semua"    ||
@@ -542,6 +574,12 @@ export default function ReminderPage() {
 
   const selectedLead = leads.find((l) => l.id === selectedId) || null;
 
+  useEffect(() => {
+    if (selectedLead?.leadId) {
+      fetchFollowupHistory(selectedLead.leadId);
+    }
+  }, [selectedLead]);
+
   async function handleTandaiSelesai() {
     try {
       const token = localStorage.getItem("token");
@@ -552,7 +590,14 @@ export default function ReminderPage() {
           "Content-Type": "application/json",
         },
       });
-      fetchLeads();
+      
+      // Memberikan jeda singkat demi konsistensi data DB sebelum fetch ulang
+      await new Promise(r => setTimeout(r, 300));
+      await fetchLeads();
+      
+      if (selectedLead?.leadId) {
+        await fetchFollowupHistory(selectedLead.leadId);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -562,7 +607,7 @@ export default function ReminderPage() {
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
-      await fetch(`${API}/api/followups`, {
+      const res = await fetch(`${API}/followups`, {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -573,10 +618,28 @@ export default function ReminderPage() {
           salesId: user?.id,
           notes,
           followupDate: new Date(),
-          status: "pending",
+          status: "done",
         }),
       });
-      fetchLeads();
+
+      console.log("STATUS:", res.status);
+
+      const data = await res.text();
+      console.log("RESPONSE:", data);
+
+      if (!res.ok) {
+        throw new Error(data);
+      }
+
+      // ── REFETCH AFTER CATAT DENGAN TIMEOUT DELAY ───────────────────────────
+      await new Promise(r => setTimeout(r, 300));
+      await fetchLeads();
+      // ─────────────────────────────────────────────────────────────────────
+
+      if (selectedLead?.leadId) {
+        await fetchFollowupHistory(selectedLead.leadId);
+      }
+
       alert("✅ Aktivitas berhasil dicatat!");
     } catch (err) {
       console.error(err);
@@ -598,6 +661,7 @@ export default function ReminderPage() {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
+                year: "numeric",
                 year: "numeric",
               })}
             </div>

@@ -621,6 +621,8 @@ input[type='checkbox'] {
 .ic-btn.view:hover  { background: #bfdbfe; }
 .ic-btn.del   { background: #fee2e2; color: #dc2626; }
 .ic-btn.del:hover   { background: #fecaca; }
+.ic-btn.followup {background: #dcfce7;color: #15803d;}
+.ic-btn.followup:hover {background: #bbf7d0;}
 
 /* ─── PAGINATION ─────────────────────────────────── */
 .pagination {

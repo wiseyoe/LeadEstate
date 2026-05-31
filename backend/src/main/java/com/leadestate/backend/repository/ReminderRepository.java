@@ -74,9 +74,10 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
         LEFT JOIN users u
             ON l.sales_id = u.id
 
-        WHERE fu.status != 'cancelled'
+        WHERE fu.status != 'cancelled' 
+        AND fu.status != 'deleted'
 
-        ORDER BY r.reminder_date ASC
+        ORDER BY fu.created_at DESC
     """, nativeQuery = true)
     List<Object[]> getAllReminderDetails();
     
@@ -119,13 +120,14 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
             ON l.sales_id = u.id
 
         WHERE fu.status != 'cancelled'
+        AND fu.status != 'deleted'
         AND l.sales_id = :salesId
 
-        ORDER BY r.reminder_date ASC
+        ORDER BY fu.created_at DESC
         """, nativeQuery = true)
         List<Object[]> getReminderDetailsBySalesId(@Param("salesId") Integer salesId);
 
-        @Query(value = """
+    @Query(value = """
         SELECT l.sales_id
         FROM reminders r
         JOIN follow_ups fu
