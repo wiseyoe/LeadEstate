@@ -420,12 +420,6 @@ function SectionTim({ showToast }) {
 
 // 3. ZONA BAHAYA
 function SectionBahaya({ showToast }) {
-  const confirm = (action) => {
-    if (window.confirm(`Apakah Anda yakin ingin melakukan: "${action}"?\n\nTindakan ini tidak bisa dibatalkan.`)) {
-      showToast(`⚠️ ${action} sedang diproses...`);
-    }
-  };
-
   return (
     <div className="set-card danger-card">
       <div className="set-card-head danger-head">
@@ -439,18 +433,6 @@ function SectionBahaya({ showToast }) {
       </div>
 
       <div>
-        {DANGER_ITEMS.map((item) => (
-          <div key={item.key} className="danger-item">
-            <div className="di-info">
-              <div className="di-title">{item.title}</div>
-              <div className="di-desc">{item.desc}</div>
-            </div>
-            <SecBtn danger solid={item.solid} onClick={() => confirm(item.title)}>
-              {item.label}
-            </SecBtn>
-          </div>
-        ))}
-
         {/* Logout */}
         <div className="danger-item">
           <div className="di-info">
@@ -461,9 +443,9 @@ function SectionBahaya({ showToast }) {
             type="button"
             className="logout-btn"
             onClick={() => {
-              localStorage.removeItem("isLogin"); // hapus status login
-              localStorage.removeItem("user");    // hapus data user
-              window.location.href = "/";         // redirect ke login
+              localStorage.removeItem("isLogin");
+              localStorage.removeItem("user");
+              window.location.href = "/";
             }}
           >
             🚪 Logout
