@@ -2,12 +2,8 @@ package com.leadestate.backend.service;
 
 import com.leadestate.backend.dto.FollowUpRequest;
 import com.leadestate.backend.entity.FollowUp;
-import com.leadestate.backend.entity.NotificationSetting;
-import com.leadestate.backend.entity.Lead;
 
-import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
-import com.leadestate.backend.repository.NotificationSettingRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +16,6 @@ public class FollowUpService {
     @Autowired
     private FollowUpRepository followUpRepository;
 
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private NotificationSettingRepository settingRepo;
-
-    @Autowired
-    private LeadRepository leadRepository;
 
     public List<FollowUp> getByLeadId(Long leadId) {
         return followUpRepository.findByLeadIdOrderByCreatedAtDesc(leadId);
@@ -72,8 +60,6 @@ public class FollowUpService {
 
                 saved = followUpRepository.save(last);
                 
-                // Trigger notifikasi sebelum return early
-                triggerNotification(request);
                 return saved;
             }
         }
@@ -93,28 +79,6 @@ public class FollowUpService {
 
         saved = followUpRepository.save(followUp);
 
-        // Trigger notifikasi untuk data baru
-        triggerNotification(request);
-
         return saved;
-    }
-
-    // ── PRIVATE HELPER UNTUK NOTIFIKASI ──────────────────────────────────────
-    private void triggerNotification(FollowUpRequest request) {
-        Lead lead = leadRepository.findById(request.getLeadId().intValue())
-                .orElse(null);
-
-        String leadName = (lead != null) ? lead.getName() : "Unknown Lead";
-
-        NotificationSetting setting = settingRepo.findByUserId(request.getSalesId().intValue())
-                .orElse(null);
-
-        if (setting != null && Boolean.TRUE.equals(setting.getFollowupApp())) {
-            notificationService.createNotification(
-                    request.getSalesId().intValue(),
-                    "Reminder Follow Up",
-                    "Lead " + leadName + " masuk ke reminder follow up"
-            );
-        }
     }
 }

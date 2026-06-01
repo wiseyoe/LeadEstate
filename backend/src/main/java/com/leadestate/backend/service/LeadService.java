@@ -1,4 +1,5 @@
 package com.leadestate.backend.service;
+
 import com.leadestate.backend.entity.Property;
 import com.leadestate.backend.repository.PropertyRepository;
 import com.leadestate.backend.repository.UserRepository;
@@ -8,8 +9,6 @@ import com.leadestate.backend.dto.ReportResponse;
 import com.leadestate.backend.entity.Lead;
 import com.leadestate.backend.entity.LeadStatus;
 import com.leadestate.backend.entity.User;
-import com.leadestate.backend.entity.NotificationSetting;
-import com.leadestate.backend.repository.NotificationSettingRepository;
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.LeadStatusRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
@@ -30,12 +29,6 @@ public class LeadService {
 
     @Autowired
     private LeadStatusRepository leadStatusRepository;
-
-    @Autowired
-    private NotificationSettingRepository notificationSettingRepository;
-
-    @Autowired
-    private NotificationService notificationService;
 
     @Autowired
     private PropertyRepository propertyRepository;
@@ -117,45 +110,6 @@ public class LeadService {
                 lead
             );
 
-        // NOTIF LEAD BARU
-        NotificationSetting setting =
-            notificationSettingRepository
-            .findByUserId(
-                request.getSalesId()
-            )
-            .orElse(null);
-
-        if(
-            setting!=null
-            &&
-            Boolean.TRUE.equals(
-                setting.getLeadApp()
-            )
-        ){
-
-        notificationService.createNotification(
-            request.getSalesId(),
-            "Lead Baru",
-            "Lead baru masuk: "
-            +lead.getName()
-        );
-
-        }
-
-        if(
-            setting != null
-            &&
-            Boolean.TRUE.equals(
-                setting.getLeadWa()
-            )
-        ){
-
-            System.out.println(
-                "NOTIF WA -> Lead baru masuk"
-            );
-
-        }
-
         return savedLead;
     }
 
@@ -204,59 +158,6 @@ public class LeadService {
                 leadRepository.save(
                         lead
                 );
-
-        NotificationSetting setting =
-                notificationSettingRepository
-                .findByUserId(
-                        lead.getSales().getId()
-                )
-                .orElse(null);
-
-        // STATUS BERUBAH
-        if(
-                setting != null
-                &&
-                Boolean.TRUE.equals(
-                        setting.getStatusApp()
-                )
-        ){
-
-            notificationService
-            .createNotification(
-                    lead.getSales().getId(),
-                    "Status Lead",
-                    "Status berubah menjadi "
-                    + status.getStatusName()
-            );
-
-        }
-
-        // CLOSING
-        if(
-                setting != null
-                &&
-                Boolean.TRUE.equals(
-                        setting.getClosingApp()
-                )
-                &&
-                status.getStatusName()!=null
-                &&
-                status.getStatusName()
-                .equalsIgnoreCase(
-                        "Closed"
-                )
-        ){
-
-            notificationService
-            .createNotification(
-                    lead.getSales().getId(),
-                    "Closing Berhasil",
-                    "Deal lead "
-                    + lead.getName()
-                    + " berhasil ditutup"
-            );
-
-        }
 
         return saved;
     }

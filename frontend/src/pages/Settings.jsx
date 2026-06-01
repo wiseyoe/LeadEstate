@@ -223,48 +223,7 @@ function SectionProfil({ onDirty, form, setForm }) {
   );
 }
 
-
-// 3. INTEGRASI
-function SectionIntegrasi({ showToast }) {
-  const [integs, setIntegs] = useState(INTEGRATIONS);
-
-  const toggleConnect = (i) => {
-    setIntegs((prev) => {
-      const next = [...prev];
-      next[i] = { ...next[i], connected: !next[i].connected };
-      return next;
-    });
-    const item = integs[i];
-    showToast(`${item.connected ? "Memutus" : "Menghubungkan"} ${item.name}...`);
-  };
-
-  return (
-    <div className="set-card">
-      <CardHead icon="🔗" iconBg="#dbeafe" title="Integrasi Aplikasi" desc="Hubungkan LeadEstate dengan tools lain" />
-      <div>
-        {integs.map((item, i) => (
-          <div key={item.name} className="integ-item">
-            <div className="integ-logo" style={{ background: item.connected ? "#dcfce7" : "#f3f4f6" }}>
-              {item.logo}
-            </div>
-            <div className="integ-info">
-              <div className="integ-name">{item.name}</div>
-              <div className="integ-desc">{item.desc}</div>
-            </div>
-            <span className={`integ-status ${item.connected ? "is-connected" : "is-disconnected"}`}>
-              {item.connected ? "✓ Terhubung" : "Belum terhubung"}
-            </span>
-            <SecBtn danger={item.connected} onClick={() => toggleConnect(i)}>
-              {item.connected ? "Putuskan" : "Hubungkan"}
-            </SecBtn>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// 4. MANAJEMEN TIM
+// 2. MANAJEMEN TIM
 function SectionTim({ showToast }) {
   const [team, setTeam] = useState([]);
   const [search, setSearch] = useState("");
@@ -459,7 +418,7 @@ function SectionTim({ showToast }) {
   );
 }
 
-// 5. ZONA BAHAYA
+// 3. ZONA BAHAYA
 function SectionBahaya({ showToast }) {
   const confirm = (action) => {
     if (window.confirm(`Apakah Anda yakin ingin melakukan: "${action}"?\n\nTindakan ini tidak bisa dibatalkan.`)) {
@@ -539,7 +498,6 @@ export default function Settings() {
 
   const NAV_ITEMS = [
     { id: "profil",     icon: "👤", label: "Profil Saya",     group: "Akun"    },
-    { id: "integrasi",  icon: "🔗", label: "Integrasi",       group: "Sistem"  },
 
     ...(isAdminUser()
       ? [{ id: "tim", icon: "👥", label: "Manajemen Tim", group: "Tim" }]
@@ -606,7 +564,6 @@ export default function Settings() {
   const renderSection = () => {
     switch (activeTab) {
       case "profil":     return <SectionProfil onDirty={markDirty} form={form} setForm={setForm} />;
-      case "integrasi":  return <SectionIntegrasi  showToast={showToast} />;
       case "tim":        return <SectionTim        showToast={showToast} />;
       case "bahaya":     return <SectionBahaya     showToast={showToast} />;
       default:           return null;
