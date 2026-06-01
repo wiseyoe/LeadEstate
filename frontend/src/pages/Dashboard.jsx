@@ -261,10 +261,10 @@ export default function LeadEstateDashboard() {
 
         <div className="le-content">
           <div className="le-stats-grid">
-            <StatCard color="gold" icon="📋" trend="↑ 12%" trendDir="up" value={dashboardData?.totalLeads || 0} label="Total Lead Aktif" sub="+17 lead baru" />
-            <StatCard color="blue" icon="🔔" trend="↑ 3" trendDir="up" value={dashboardData?.todayFollowups || 0} label="Follow Up Hari Ini" sub="Cek reminder" />
-            <StatCard color="red" icon="⏳" trend="↑ 4" trendDir="down" value={dashboardData?.pendingLeads || 0} label="Lead Tertunda" sub="Tindak segera" />
-            <StatCard color="green" icon="✅" trend="↑ 22%" trendDir="up" value={dashboardData?.monthlyClosing || 0} label="Closing Bulan Ini" sub="Target: 15" />
+            <StatCard color="gold" icon="📋" value={dashboardData?.totalLeads || 0} label="Total Lead Aktif" sub="Total leads" />
+            <StatCard color="blue" icon="🔔" value={dashboardData?.todayFollowups || 0} label="Follow Up Hari Ini" sub="Cek reminder" />
+            <StatCard color="red" icon="⏳" value={dashboardData?.pendingLeads || 0} label="Lead Tertunda" sub="Tindak segera" />
+            <StatCard color="green" icon="✅" value={dashboardData?.monthlyClosing || 0} label="Closing Bulan Ini" sub="Closing" />
           </div>
 
           <div className="le-mid-row">

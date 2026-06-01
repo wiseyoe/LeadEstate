@@ -954,8 +954,14 @@ export default function LeadEstateLaporan() {
               <select className="period-select">
                 <option>Semua Sales</option>
               </select>
-              <button className="print-btn" onClick={() => window.print()}>
-                🖨️ Print
+              <button
+                className="print-btn"
+                onClick={() => {
+                  document.title = `Laporan-LeadEstate-${selectedMonth}-${selectedYear}`;
+                  window.print();
+                }}
+              >
+                🖨️ Print PDF
               </button>
             </div>
 

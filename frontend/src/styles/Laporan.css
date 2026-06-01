@@ -1038,3 +1038,125 @@
   color: #5a7a94;
   margin-top: 1px;
 }
+
+/* =========================================
+   PRINT PDF STYLE
+========================================= */
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body {
+    background: white !important;
+  }
+
+.app-wrapper {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+  /* Hilangkan elemen yang tidak perlu */
+  .le-sidebar,
+  .topbar-right,
+  .toolbar,
+  .chip,
+  .print-btn,
+  .chart-legend {
+    display: none !important;
+  }
+
+  .main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .content {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  /* Judul */
+  .topbar {
+    border: none !important;
+    margin-bottom: 20px;
+    padding: 0;
+  }
+
+  .topbar-title {
+    font-size: 28px !important;
+    font-weight: 700;
+  }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .kpi-card {
+    break-inside: avoid;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+  }
+
+  /* Card umum */
+.card {
+  box-shadow: none !important;
+  border: 1px solid #ddd !important;
+  margin-bottom: 16px;
+  overflow: visible !important;
+
+  page-break-inside: auto !important;
+  break-inside: auto !important;
+}
+
+  /* Layout chart */
+  .row2,
+  .row3 {
+    display: block !important;
+  }
+
+  .row2 .card,
+  .row3 .card {
+    width: 100% !important;
+    margin-bottom: 16px;
+  }
+
+  /* Table */
+  .sum-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .sum-table th,
+  .sum-table td {
+    border: 1px solid #ddd !important;
+    padding: 8px;
+  }
+
+  .sum-table th {
+    background: #f5f5f5 !important;
+    color: black !important;
+  }
+
+  /* Warna chart tetap keluar di PDF */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
