@@ -3,42 +3,9 @@ import "../styles/Settings.css";
 import logo from "../assets/leadestate-logo.png";
 import { useNavigate } from "react-router-dom";
 import { updateProfile, getAllUsers, deleteUser, updateUserRole } from "../api/api";
-import { getNotifSettings, saveNotifSettings, getNotifications } from "../api/api";
+
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
-
-const NOTIF_DATA = [
-  {
-    cat: "Follow Up Jatuh Tempo",
-    sub: "Pengingat jadwal follow up",
-    app: true,
-    wa: true
-  },
-  {
-    cat: "Lead Baru Masuk",
-    sub: "Saat ada lead baru ditambahkan",
-    app: true,
-    wa: false
-  },
-  {
-    cat: "Status Lead Berubah",
-    sub: "Update status oleh tim sales",
-    app: true,
-    wa: false
-  },
-  {
-    cat: "Closing Berhasil",
-    sub: "Notifikasi deal selesai",
-    app: true,
-    wa: true
-  },
-  {
-    cat: "Pengumuman Sistem",
-    sub: "Update fitur & maintenance",
-    app: true,
-    wa: false
-  }
-];
 
 const INTEGRATIONS = [
   {
@@ -256,293 +223,6 @@ function SectionProfil({ onDirty, form, setForm }) {
   );
 }
 
-// 2. NOTIFIKASI
-function SectionNotifikasi({ onDirty }) {
-  const user = getCurrentUser();
-  const [states, setStates] = useState({
-    followupApp: true,
-    followupWa: true,
-
-    leadApp: true,
-    leadWa: false,
-
-    statusApp: true,
-    statusWa: false,
-
-    closingApp: true,
-    closingWa: true,
-
-    systemApp: true,
-    systemWa: false
-  });
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const data =
-        await getNotifSettings(
-          user.id
-        );
-
-      if (data) {
-        setStates({
-          followupApp:
-            data.followupApp ?? true,
-          followupWa:
-            data.followupWa ?? true,
-          leadApp:
-            data.leadApp ?? true,
-          leadWa:
-            data.leadWa ?? false,
-          statusApp:
-            data.statusApp ?? true,
-          statusWa:
-            data.statusWa ?? false,
-          closingApp:
-            data.closingApp ?? true,
-          closingWa:
-            data.closingWa ?? true,
-          systemApp:
-            data.systemApp ?? true,
-          systemWa:
-            data.systemWa ?? false
-        });
-      }
-    } catch (err) {
-      console.error(
-        "Notif load error",
-        err
-      );
-    }
-  };
-
-  const toggle = async (key) => {
-    const updated = {
-      ...states,
-      [key]:
-        !states[key]
-    };
-
-    setStates(updated);
-    onDirty();
-
-    try {
-      await saveNotifSettings(
-        user.id,
-        updated
-      );
-    } catch (err) {
-      console.error(
-        "Notif save error",
-        err
-      );
-    }
-  };
-
-  return (
-    <div className="set-card">
-      <CardHead
-        icon="🔔"
-        iconBg="#fef3cd"
-        title="Preferensi Notifikasi"
-        desc="Atur kapan dan bagaimana kamu diberitahu"
-      />
-      <table className="notif-table">
-        <thead>
-          <tr>
-            <th>Jenis Notifikasi</th>
-            <th className="text-center">
-              In-App
-            </th>
-            <th className="text-center">
-              WhatsApp
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-
-          {/* FOLLOWUP */}
-          <tr>
-            <td>
-              <div className="notif-category">
-                Follow Up Jatuh Tempo
-              </div>
-
-              <div className="notif-sub">
-                Pengingat jadwal follow up
-              </div>
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.followupApp}
-                onChange={() =>
-                  toggle(
-                    "followupApp"
-                  )
-                }
-              />
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.followupWa}
-                onChange={() =>
-                  toggle(
-                    "followupWa"
-                  )
-                }
-              />
-            </td>
-          </tr>
-
-          {/* LEAD */}
-          <tr>
-            <td>
-              <div className="notif-category">
-                Lead Baru Masuk
-              </div>
-
-              <div className="notif-sub">
-                Saat ada lead baru ditambahkan
-              </div>
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.leadApp}
-                onChange={() =>
-                  toggle(
-                    "leadApp"
-                  )
-                }
-              />
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.leadWa}
-                onChange={() =>
-                  toggle(
-                    "leadWa"
-                  )
-                }
-              />
-            </td>
-          </tr>
-
-          {/* STATUS */}
-          <tr>
-            <td>
-              <div className="notif-category">
-                Status Lead Berubah
-              </div>
-
-              <div className="notif-sub">
-                Update status oleh tim sales
-              </div>
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.statusApp}
-                onChange={() =>
-                  toggle(
-                    "statusApp"
-                  )
-                }
-              />
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.statusWa}
-                onChange={() =>
-                  toggle(
-                    "statusWa"
-                  )
-                }
-              />
-            </td>
-          </tr>
-
-          {/* CLOSING */}
-          <tr>
-            <td>
-              <div className="notif-category">
-                Closing Berhasil
-              </div>
-
-              <div className="notif-sub">
-                Notifikasi deal selesai
-              </div>
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.closingApp}
-                onChange={() =>
-                  toggle(
-                    "closingApp"
-                  )
-                }
-              />
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.closingWa}
-                onChange={() =>
-                  toggle(
-                    "closingWa"
-                  )
-                }
-              />
-            </td>
-          </tr>
-
-          {/* SYSTEM */}
-          <tr>
-            <td>
-              <div className="notif-category">
-                Pengumuman Sistem
-              </div>
-
-              <div className="notif-sub">
-                Update fitur & maintenance
-              </div>
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.systemApp}
-                onChange={() =>
-                  toggle(
-                    "systemApp"
-                  )
-                }
-              />
-            </td>
-
-            <td className="text-center">
-              <Toggle
-                on={states.systemWa}
-                onChange={() =>
-                  toggle(
-                    "systemWa"
-                  )
-                }
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 // 3. INTEGRASI
 function SectionIntegrasi({ showToast }) {
@@ -859,7 +539,6 @@ export default function Settings() {
 
   const NAV_ITEMS = [
     { id: "profil",     icon: "👤", label: "Profil Saya",     group: "Akun"    },
-    { id: "notifikasi", icon: "🔔", label: "Notifikasi",      group: "Sistem"  },
     { id: "integrasi",  icon: "🔗", label: "Integrasi",       group: "Sistem"  },
 
     ...(isAdminUser()
@@ -927,7 +606,6 @@ export default function Settings() {
   const renderSection = () => {
     switch (activeTab) {
       case "profil":     return <SectionProfil onDirty={markDirty} form={form} setForm={setForm} />;
-      case "notifikasi": return <SectionNotifikasi onDirty={markDirty} />;
       case "integrasi":  return <SectionIntegrasi  showToast={showToast} />;
       case "tim":        return <SectionTim        showToast={showToast} />;
       case "bahaya":     return <SectionBahaya     showToast={showToast} />;
@@ -935,21 +613,6 @@ export default function Settings() {
     }
   };
 
-  const [notifications, setNotifications] = useState([]);
-  const [showNotif, setShowNotif] = useState(false);
-
-  useEffect(() => {
-    loadNotif();
-  }, []);
-
-  const loadNotif = async () => {
-    try {
-      const data = await getNotifications(user.id);
-      setNotifications(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   return (
     <div className="settings-page">
@@ -1078,55 +741,7 @@ export default function Settings() {
                   }
                 )}
               </div>
-              <div className="notif-wrapper">
-                <div
-                  className="notif-btn"
-                  onClick={() =>
-                    setShowNotif(!showNotif)
-                  }
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="#6b7280"
-                  >
-                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                  </svg>
-                  {notifications.some(
-                    n => !n.isRead
-                  ) && (
-                    <div className="notif-dot"/>
-                  )}
-                </div>
-                {showNotif && (
-                  <div className="notif-dropdown">
-                    <h4>Notifikasi</h4>
-                    {notifications.length === 0 ? (
-                      <p>Belum ada notif</p>
-                    ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`notif-item ${
-                            n.isRead
-                              ? "read"
-                              : "unread"
-                          }`}
-                        >
-                          <b>{n.title}</b>
-                          <p>{n.message}</p>
-                          <small>
-                            {new Date(
-                              n.createdAt
-                            ).toLocaleString()}
-                          </small>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
+
             </div>
         </div>
 
