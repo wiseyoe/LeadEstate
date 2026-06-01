@@ -57,4 +57,23 @@ public class ReminderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @PostMapping
+public ResponseEntity<?> createReminder(@RequestBody Map<String, Object> request) {
+    try {
+        reminderService.createReminder(request);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Reminder berhasil dibuat");
+
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("message", "Gagal membuat reminder");
+        error.put("error", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/ReminderPage.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/leadestate-logo.png";
@@ -219,7 +219,7 @@ function ContactCard({ lead }) {
               onClick={() =>
                 window.open(
                   `https://wa.me/${lead.phone.replace(/\D/g, "")}`,
-                  "_blank"
+                  "__blank"
                 )
               }
             >
@@ -313,7 +313,7 @@ function ActionCard({ lead, onTandaiSelesai, onCatatAktivitas }) {
 
     window.open(
       `https://wa.me/${cleanPhone}?text=${encodedMessage}`,
-      "_blank"
+      "__blank"
     );
   }
 
@@ -415,20 +415,62 @@ export default function ReminderPage() {
   const [searchQ, setSearchQ]         = useState("");
   const location = useLocation();
 
+  // ── FIX 2B: Menggunakan useRef guard untuk menangani StrictMode double-invoke ──
+  const reminderCreatedRef = useRef(false);
+
   useEffect(() => {
-    console.log("STATE:", location.state);
-  }, []);
+    if (location.state?.leadId && !reminderCreatedRef.current) {
+      reminderCreatedRef.current = true;
+      createReminderFromState(location.state);
+    }
+  }, [location.state]); 
 
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  // ── FIX 2A & 2B: Modifikasi fungsi createReminderFromState ──
+  async function createReminderFromState(state) {
+    try {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      const currentLeads = await fetchLeads();
+      const alreadyExists = currentLeads?.some(l => l.leadId === state.leadId);
+      
+      if (alreadyExists) {
+        console.log("Reminder untuk lead ini sudah ada, membatalkan auto-create.");
+        return;
+      }
+
+      await fetch(`${API}/api/reminders`, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          leadId: state.leadId,
+          salesId: user?.id,
+          reminderDate: new Date().toISOString(), // FIX 2A: Mengirim ISO string yang valid
+          status: "pending",
+        }),
+      });
+
+      await new Promise(r => setTimeout(r, 300));
+      await fetchLeads();
+
+    } catch (err) {
+      console.error("Gagal create reminder:", err);
+    }
+  }
 
   async function fetchLeads() {
     try {
       console.log("API URL:", API);
 
       const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
       const res = await fetch(
         `${API}/api/reminders?userId=${user.id}&role=${user.role}`
       );
@@ -438,8 +480,7 @@ export default function ReminderPage() {
       const json = await res.json();
       console.log("DATA DARI API:", json);
 
-      // ── FIX DEDUP (Diurutkan dari paling baru agar tidak tertimpa entri lama) ──
-      const rawReminders = json.data;
+      const rawReminders = json.data || [];
       const uniqueMap = new Map();
 
       rawReminders
@@ -451,7 +492,6 @@ export default function ReminderPage() {
         });
 
       const reminders = Array.from(uniqueMap.values());
-      // ─────────────────────────────────────────────────────────────────────
 
       setTodayFollowups(
         reminders.filter(
@@ -460,7 +500,6 @@ export default function ReminderPage() {
       );
 
       const mapped = reminders.map((item, index) => {
-        // ── FORCE STATUS DONE DI UI ──────────────────────────────────────────
         const reminderStatus = item.status?.toLowerCase();
         let tag = "soon";
 
@@ -475,7 +514,6 @@ export default function ReminderPage() {
           else if (diffHours <= 24) tag = "today";
           else tag = "soon";
         }
-        // ─────────────────────────────────────────────────────────────────────
 
         const leadId = item.leadId;
         const leadName = item.leadName;
@@ -533,6 +571,8 @@ export default function ReminderPage() {
       if (mapped.length > 0) {
         setSelectedId(mapped[0].id);
       }
+      
+      return mapped; 
     } catch (err) {
       console.error("ERROR FETCH:", err);
     }
@@ -580,10 +620,13 @@ export default function ReminderPage() {
     }
   }, [selectedLead]);
 
+  // ── FIX 2C: Ambil data user dari localStorage dan passing query param userId & role ──
   async function handleTandaiSelesai() {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${API}/api/reminders/${selectedId}/done`, {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      await fetch(`${API}/api/reminders/${selectedId}/done?userId=${user.id}&role=${user.role}`, {
         method: "PUT",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -591,7 +634,6 @@ export default function ReminderPage() {
         },
       });
       
-      // Memberikan jeda singkat demi konsistensi data DB sebelum fetch ulang
       await new Promise(r => setTimeout(r, 300));
       await fetchLeads();
       
@@ -606,7 +648,7 @@ export default function ReminderPage() {
   async function handleCatatAktivitas(notes) {
     try {
       const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
       const res = await fetch(`${API}/followups`, {
         method: "POST",
         headers: {
@@ -631,10 +673,8 @@ export default function ReminderPage() {
         throw new Error(data);
       }
 
-      // ── REFETCH AFTER CATAT DENGAN TIMEOUT DELAY ───────────────────────────
       await new Promise(r => setTimeout(r, 300));
       await fetchLeads();
-      // ─────────────────────────────────────────────────────────────────────
 
       if (selectedLead?.leadId) {
         await fetchFollowupHistory(selectedLead.leadId);
@@ -661,7 +701,6 @@ export default function ReminderPage() {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
-                year: "numeric",
                 year: "numeric",
               })}
             </div>

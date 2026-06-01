@@ -7,6 +7,9 @@ import com.leadestate.backend.repository.ReminderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -91,5 +94,33 @@ public class ReminderService {
         reminder.setIsSent(true);
         reminderRepository.save(reminder);
         // ─────────────────────────────────────────────────────────────────────
+    }
+
+    public void createReminder(Map<String, Object> request) {
+
+        Long leadId = Long.valueOf(request.get("leadId").toString());
+        Long salesId = Long.valueOf(request.get("salesId").toString());
+
+        // ── FIX: handle format ISO 8601 dari JavaScript (ada "Z" atau offset) ──
+        LocalDateTime reminderDate;
+        String rawDate = request.get("reminderDate").toString();
+        try {
+            reminderDate = OffsetDateTime.parse(rawDate).toLocalDateTime();
+        } catch (DateTimeParseException e) {
+            reminderDate = LocalDateTime.parse(rawDate); // fallback format biasa
+        }
+
+        FollowUp followUp = new FollowUp();
+        followUp.setLeadId(leadId);
+        followUp.setSalesId(salesId);
+        followUp.setStatus("pending");
+        followUpRepository.save(followUp);
+
+        Reminder reminder = new Reminder();
+        reminder.setFollowUp(followUp);
+        reminder.setReminderDate(reminderDate);
+        reminder.setIsSent(false);
+
+        reminderRepository.save(reminder);
     }
 }
