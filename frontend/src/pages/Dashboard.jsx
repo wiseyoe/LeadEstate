@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { getNotifications } from "../api/api";
 import apiClient from "../api/api";
 import "../styles/Dashboard.css";
 import logo from "../assets/leadestate-logo.png";
@@ -125,31 +124,10 @@ export default function LeadEstateDashboard() {
   const [chartTab, setChartTab] = useState("6");
   const [reminderFilter, setReminderFilter] = useState("Semua");
 
-  const [notifications, setNotifications] = useState([]);
-  const [showNotif, setShowNotif] = useState(false);
-
   const navigate = useNavigate();
 
   const isAdmin =
     currentUser?.role?.toLowerCase() === "admin";
-
-  // PINDAH KE SINI
-  const loadNotif = async (userId) => {
-    try {
-      const data = await getNotifications(userId);
-
-      setNotifications(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-    } catch (err) {
-      console.error(
-        "Notif error:",
-        err
-      );
-    }
-  };
 
   useEffect(() => {
     const userData =
@@ -171,11 +149,6 @@ export default function LeadEstateDashboard() {
       );
 
       fetchDashboard();
-
-      // BARU PANGGIL
-      loadNotif(
-        parsedUser.id
-      );
 
     } catch (error) {
       console.error(
@@ -275,89 +248,14 @@ export default function LeadEstateDashboard() {
           <div className="le-topbar-title">Dashboard Overview</div>
             <div className="le-topbar-right">
               <div className="le-date-chip">
-                📅 {
-                  new Date().toLocaleDateString(
-                    "id-ID",
-                    {
-                      weekday:"long",
-                      day:"numeric",
-                      month:"long",
-                      year:"numeric"
-                    }
-                  )
-                }
+                📅{" "}
+                {new Date().toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
               </div>
-              <div
-                className="le-notif-btn"
-                onClick={() =>
-                  setShowNotif(
-                    !showNotif
-                  )
-                }
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill={
-                    notifications.some(
-                      n => !n.isRead
-                    )
-                      ? "#c9a84c"
-                      : "#6b7280"
-                  }
-                >
-                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                </svg>
-                {notifications.some(
-                  n => !n.isRead
-                ) && (
-                  <div className="le-notif-dot"/>
-                )}
-              </div>
-              {showNotif && (
-                <div className="le-notif-dropdown">
-                  <h4>Notifikasi</h4>
-                  {
-                    notifications.length === 0
-                    ? (
-                      <p>
-                        Belum ada notif
-                      </p>
-                    )
-                    : (
-                      notifications.map(
-                        (n)=>(
-                          <div
-                            key={n.id}
-                            className={
-                              `le-notif-item ${
-                                n.isRead
-                                ? "read"
-                                : "unread"
-                              }`
-                            }
-                          >
-                            <b>
-                              {n.title}
-                            </b>
-                            <p>
-                              {n.message}
-                            </p>
-                            <small>
-                              {
-                                new Date(
-                                  n.createdAt
-                                ).toLocaleString()
-                              }
-                            </small>
-                          </div>
-                        )
-                      )
-                    )
-                  }
-                </div>
-              )}
             </div>
         </div>
 
