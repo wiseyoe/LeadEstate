@@ -14,10 +14,6 @@ export default function Login( { setUser } ) {
 
 const API = import.meta.env.VITE_API_URL || "";
 
-//test API
-console.log("API URL:", API);
-
-
 const handleLogin = async (e) => {
   console.log("HANDLE LOGIN KEJALAN");
 
@@ -53,10 +49,6 @@ console.log("CEK DATA DARI SERVER:", res.data);
 localStorage.setItem("user", JSON.stringify(res.data));
 setUser(res.data);
 navigate("/dashboard");
-
-    console.log("SESUDAH AXIOS");
-    console.log("FULL RESPONSE:", res);
-    console.log("DATA:", res.data);
 
     localStorage.setItem("user", JSON.stringify(res.data));
 

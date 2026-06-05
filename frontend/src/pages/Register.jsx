@@ -597,8 +597,6 @@ const handleStep1 = async (data) => {
         throw new Error(data);
       }
 
-      console.log("REGISTER SUCCESS:", data);
-
       setIsDone(true);
 
     } catch (err) {

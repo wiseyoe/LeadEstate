@@ -214,7 +214,7 @@ public class LeadService {
     }
 
     // =========================
-    // REPORT - Statistik Lead (GABUNGAN - DENGAN ESTIMATED REVENUE)
+    // REPORT - Statistik Lead
     // =========================
     public ReportResponse getLeadStats() {
         long totalLeads     = leadRepository.count();

@@ -29,12 +29,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // 🔥 UPDATE USER (FIXED + VALIDASI EMAIL)
+    // UPDATE USER
     public User updateUser(Integer id, User user) {
         User existingUser = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
-        // VALIDASI EMAIL (biar ga duplicate)
+        // VALIDASI EMAIL
         if (!existingUser.getEmail().equals(user.getEmail()) &&
             userRepository.existsByEmail(user.getEmail())) {
 
@@ -69,7 +69,7 @@ public User updateProfile(Integer id, User request) {
     user.setName(request.getName());
     user.setEmail(request.getEmail());
 
-    // optional password
+    // password
     if (request.getPassword() != null && !request.getPassword().isEmpty()) {
         user.setPassword(request.getPassword());
     }

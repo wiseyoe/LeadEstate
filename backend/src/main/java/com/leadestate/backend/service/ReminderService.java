@@ -86,14 +86,13 @@ public class ReminderService {
         FollowUp followUp =
             reminder.getFollowUp();
 
-        // ── FORCE UPDATE STATUS FOLLOWUP & REMINDER ──────────────────────────
+        // ── FORCE UPDATE STATUS FOLLOWUP & REMINDER
         followUp.setStatus("done");
         followUpRepository.save(followUp);
 
         // Update status reminder agar sinkronisasi data bersih
         reminder.setIsSent(true);
         reminderRepository.save(reminder);
-        // ─────────────────────────────────────────────────────────────────────
     }
 
     public void createReminder(Map<String, Object> request) {
@@ -101,7 +100,6 @@ public class ReminderService {
         Long leadId = Long.valueOf(request.get("leadId").toString());
         Long salesId = Long.valueOf(request.get("salesId").toString());
 
-        // ── FIX: handle format ISO 8601 dari JavaScript (ada "Z" atau offset) ──
         LocalDateTime reminderDate;
         String rawDate = request.get("reminderDate").toString();
         try {

@@ -21,9 +21,9 @@ public class ReportController {
     private ReportService reportService;
 
     @Autowired
-    private AuthService authService; // Inject AuthService
+    private AuthService authService;
 
-    // 🔹 EXISTING dengan validasi Admin
+    // validasi Admin
     @GetMapping
     public ReportResponse getReport(
             @RequestHeader("Role") String role
@@ -32,7 +32,6 @@ public class ReportController {
         return leadService.getLeadStats();
     }
 
-    // 🔥 BARU dengan validasi Admin
     @GetMapping("/followup-status")
     public Object getFollowUpStatusReport(
             @RequestHeader("Role") String role

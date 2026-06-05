@@ -129,7 +129,6 @@ public class UserController {
             User updatedUser = userService.updateProfile(id, user);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
-            // Karena tidak ada checkAdmin, langsung lempar BAD_REQUEST (atau NOT_FOUND)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(e.getMessage());
         }

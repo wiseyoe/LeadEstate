@@ -467,7 +467,6 @@ export default function ReminderPage() {
 
   async function fetchLeads() {
     try {
-      console.log("API URL:", API);
 
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -478,7 +477,6 @@ export default function ReminderPage() {
       console.log("STATUS:", res.status);
 
       const json = await res.json();
-      console.log("DATA DARI API:", json);
 
       const rawReminders = json.data || [];
       const uniqueMap = new Map();

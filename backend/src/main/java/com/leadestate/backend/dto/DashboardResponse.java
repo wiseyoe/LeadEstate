@@ -20,12 +20,10 @@ public class DashboardResponse {
     private long pendingLeads;
     private long monthlyClosing;
 
-    // Field Tambahan untuk Chart, Top Sales, dan Reminders
     private List<ChartResponse> chartData;
     private List<TopSalesResponse> topSales;
     private List<ReminderResponse> reminders;
 
-    // Default Constructor (Berguna untuk library JSON seperti Jackson)
     public DashboardResponse() {}
 
     // Constructor Lengkap

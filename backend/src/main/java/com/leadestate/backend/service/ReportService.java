@@ -44,7 +44,6 @@ public class ReportService {
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            // Query sekarang return 2 kolom: [statusName, COUNT]
             String statusName = row[0] != null ? (String) row[0] : "Tidak Ada Status";
             long count = ((Number) row[1]).longValue();
 
@@ -54,7 +53,6 @@ public class ReportService {
         return response;
     }
 
-    // Lead per Month (dengan closing)
     public List<ChartResponse> getLeadPerMonthReport() {
 
         List<Object[]> results = leadRepository.getChartData();
@@ -63,7 +61,6 @@ public class ReportService {
         String[] months = {"Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"};
 
         for (Object[] row : results) {
-            // getChartData return: [month(int), leads(long), closing(long)]
             int monthIndex = ((Number) row[0]).intValue();
             long leads     = ((Number) row[1]).longValue();
             long closing   = ((Number) row[2]).longValue();
@@ -74,20 +71,15 @@ public class ReportService {
         return response;
     }
 
-    // Performance per Sales — berdasarkan jumlah CLOSING (status_id = 5)
     public List<ChartResponse> getSalesPerformanceReport() {
 
-        // Pakai getTopSales() yang sudah filter WHERE status_id = 5
         List<Object[]> results = leadRepository.getTopSales();
         List<ChartResponse> response = new ArrayList<>();
 
         for (Object[] row : results) {
-            // getTopSales return: [name(String), COUNT(long)]
             String salesName = row[0] != null ? (String) row[0] : "Unknown";
             long closingCount = ((Number) row[1]).longValue();
 
-            // Pakai constructor (m, leads, closing):
-            // m = nama sales, leads = 0 (tidak dipakai), closing = jumlah closing
             response.add(new ChartResponse(salesName, 0, (int) closingCount));
         }
 

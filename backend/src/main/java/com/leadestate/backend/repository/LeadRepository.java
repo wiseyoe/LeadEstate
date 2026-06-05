@@ -12,13 +12,9 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     // Filter lead berdasarkan ID sales
     List<Lead> findBySales_Id(Integer salesId);
 
-    // Menghitung total semua lead
     long count();
-
-    // Menghitung lead berdasarkan ID status tertentu
     long countByStatus_Id(int statusId);
 
-    // Query kustom untuk mengambil statistik jumlah lead per status
     // LEFT JOIN agar lead tanpa status tetap terhitung
     @Query("SELECT COALESCE(l.status.statusName, 'Tidak Ada Status'), COUNT(l) " +
        "FROM Lead l " +

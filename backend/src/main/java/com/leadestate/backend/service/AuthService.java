@@ -16,7 +16,6 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    // NOTE: sementara pakai HashMap, seharusnya pakai database + expiry time
     private Map<String, String> resetTokens = new HashMap<>();
     private Map<String, Long> tokenExpiry = new HashMap<>();
 
@@ -32,19 +31,15 @@ public class AuthService {
                 });
 
         System.out.println("✅ USER DITEMUKAN: " + user.getEmail());
-        // DEBUG ONLY (hapus di production)
-
+        // DEBUG
         if (!user.getPassword().equals(password)) {
             System.out.println("❌ PASSWORD SALAH");
             throw new RuntimeException("Password salah");
         }
 
         System.out.println("🎉 LOGIN BERHASIL");
-
-        // 🔥 TAMBAHAN LOGIC ROLE
         System.out.println("ROLE ID: " + user.getRoleId());
 
-        // convert roleId → roleName
         String roleName = switch (user.getRoleId() != null ? user.getRoleId() : 0) {
             case 1 -> "Admin";
             case 3 -> "Sales";
@@ -116,7 +111,6 @@ public class AuthService {
 
         resetTokens.put(token, user.getEmail());
 
-        // expired 5 menit
         tokenExpiry.put(token, System.currentTimeMillis() + (5 * 60 * 1000));
 
         return token;
@@ -174,7 +168,7 @@ public class AuthService {
     }
 
     // ==========================
-    // 🔥 HELPER AUTHORIZATION
+    // HELPER AUTHORIZATION
     // ==========================
 
     public void checkAdmin(String role) {

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.leadestate.backend.dto.DashboardResponse;
 import com.leadestate.backend.dto.ChartResponse;
-import com.leadestate.backend.dto.TopSalesResponse; // Pastikan ini ada
-import com.leadestate.backend.dto.ReminderResponse; // Pastikan ini ada
+import com.leadestate.backend.dto.TopSalesResponse;
+import com.leadestate.backend.dto.ReminderResponse;
 import com.leadestate.backend.repository.LeadRepository;
 import com.leadestate.backend.repository.FollowUpRepository;
 import com.leadestate.backend.repository.ReminderRepository;
@@ -28,7 +28,6 @@ public class DashboardService {
     private ReminderRepository reminderRepository;
 
     public DashboardResponse getDashboardData(String role, Integer userId) {
-        // 1. Hitung data statistik utama dari Database
         long totalLeads = leadRepository.count();
 
         long totalFollowUps = followUpRepository.count();
@@ -42,8 +41,6 @@ public class DashboardService {
         long closedLeads = leadRepository.countByStatus_Id(5); // status 5 = Closed
         long activeLeads = totalLeads - closedLeads;
         
-        // 2. Inisialisasi DashboardResponse menggunakan Constructor
-        // Karena kita sudah mengupdate DashboardResponse, kita kirimkan null dulu untuk List-nya
         DashboardResponse response = new DashboardResponse(
             totalLeads,
             totalFollowUps,
@@ -54,12 +51,11 @@ public class DashboardService {
             doneReminders,
             closedLeads,
             activeLeads,
-            null, // chartData
-            null, // topSales
-            null  // reminders
+            null,
+            null,
+            null
         );
 
-        // 3. IMPLEMENTASI DATA REAL DARI REPOSITORY (GANTI HARDCODE)
         // ================= CHART DATA =================
         List<Object[]> chartResults = leadRepository.getChartData();
         List<ChartResponse> chartData = new ArrayList<>();
@@ -107,7 +103,7 @@ public class DashboardService {
             topSales.add(new TopSalesResponse(
                 name,
                 initials,
-                (int) closing * 2, // Dummy logic untuk follow-up ratio
+                (int) closing * 2,
                 (int) closing,
                 colors[i % colors.length]
             ));
@@ -181,7 +177,7 @@ public class DashboardService {
     }
 
     /**
-     * Implementasi STEP 2: Mengambil statistik Leads berdasarkan Status (Real Data)
+     * Mengambil statistik Leads berdasarkan Status
      */
     public List<ChartResponse> getLeadsByStatus() {
         List<Object[]> results = leadRepository.countLeadsByStatus();

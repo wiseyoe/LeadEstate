@@ -47,7 +47,6 @@ public class FollowUpService {
             FollowUp last = existing.get(0);
 
             if (!"done".equalsIgnoreCase(last.getStatus())) {
-                // 🔥 UPDATE existing (BUKAN bikin baru)
                 last.setNotes(request.getNotes());
                 last.setFollowupDate(request.getFollowupDate());
                 
